@@ -1,11 +1,19 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "@next/font/google";
 
-const inter = Inter({ subsets: ['latin'] })
+import styles from "@/styles/Home.module.css";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
+
+import { GetServerSideProps } from "next";
+import { getSessionData } from "@/utils/getServerSide";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const { data: session } = useSession();
+  const router = useRouter();
   return (
     <>
       <Head>
@@ -16,6 +24,19 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div className={styles.description}>
+          {session ? (
+            <>
+              {session.user?.name}님 반갑습니다 <br />
+              <button type="button" onClick={() => signOut()}>
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              로그인되지 않았습니다 <br />
+              <button onClick={() => router.push("/login")}>로그인</button>
+            </>
+          )}
           <p>
             Get started by editing&nbsp;
             <code className={styles.code}>pages/index.tsx</code>
@@ -26,7 +47,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{' '}
+              By{" "}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"
@@ -119,5 +140,13 @@ export default function Home() {
         </div>
       </main>
     </>
-  )
+  );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+  const session = await getSessionData(req, res);
+
+  return {
+    props: { session },
+  };
+};
