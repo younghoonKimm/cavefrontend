@@ -1,19 +1,16 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
+import Head from 'next/head';
+import Image from 'next/image';
 
-import styles from "@/styles/Home.module.css";
-import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
-import { GetServerSideProps } from "next";
-import { getSessionData } from "@/utils/getServerSide";
-
-const inter = Inter({ subsets: ["latin"] });
+import { GetServerSideProps } from 'next';
+import { getSessionData, getTokens } from '@/utils/getServerSide';
 
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
+
   return (
     <>
       <Head>
@@ -22,8 +19,8 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
+      <main>
+        <div>
           {session ? (
             <>
               {session.user?.name}님 반갑습니다 <br />
@@ -34,12 +31,12 @@ export default function Home() {
           ) : (
             <>
               로그인되지 않았습니다 <br />
-              <button onClick={() => router.push("/login")}>로그인</button>
+              <button onClick={() => router.push('/login')}>로그인</button>
             </>
           )}
           <p>
             Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
+            <code>pages/index.tsx</code>
           </p>
           <div>
             <a
@@ -47,11 +44,9 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              By{" "}
               <Image
                 src="/vercel.svg"
                 alt="Vercel Logo"
-                className={styles.vercelLogo}
                 width={100}
                 height={24}
                 priority
@@ -67,6 +62,19 @@ export default function Home() {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSessionData(req, res);
 
+  if (session) {
+    const { cookies } = req;
+
+    //login
+    if (!cookies['CAV_ACC'] && !cookies['CAV_RFS']) {
+      const cookies = await getTokens(session);
+      if (cookies) {
+        res.setHeader('set-cookie', [...cookies]);
+      }
+    }
+  } else {
+    res.setHeader('set-cookie', []);
+  }
   return {
     props: { session },
   };

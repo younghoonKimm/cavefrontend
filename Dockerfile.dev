@@ -1,0 +1,21 @@
+FROM node:alpine as builder
+
+WORKDIR /app
+
+COPY package.json ./
+
+COPY yarn.lock ./
+
+RUN yarn install --frozen-lockfile --ignore-engines
+
+COPY . .
+
+ENV NODE_ENV dev
+
+RUN yarn run build
+
+FROM nginx
+
+EXPOSE 3000
+
+CMD ["yarn", "start"]

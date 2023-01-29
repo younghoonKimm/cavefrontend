@@ -1,13 +1,12 @@
-import axios from "axios";
-import NextAuth, { NextAuthOptions } from "next-auth";
-import KakaoProvider from "next-auth/providers/kakao";
-import { Cookies } from "react-cookie";
+import axios from 'axios';
+import NextAuth, { NextAuthOptions } from 'next-auth';
+import KakaoProvider from 'next-auth/providers/kakao';
 
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 30 days
-    updateAge: 24 * 60 * 60, // 24 hours
+    strategy: 'jwt',
+    maxAge: 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
 
   // debug: true,
@@ -19,13 +18,25 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: '/login',
   },
+  cookies: {},
+  events: {
+    signIn: async (message) => {
+      const { user, account, profile } = message;
 
+      if (account && profile) {
+        const { provider, expires_at, providerAccountId: providerId } = account;
+        // const { properties } = profile;
+        const { name, image: profileImg, email } = user;
+      }
+    },
+  },
   secret: process.env.NEXT_AUTH_SECRE_KEY,
+
   callbacks: {
     async signIn({ account, profile }: any) {
-      if (account?.provider === "kakao") {
+      if (account?.provider === 'kakao') {
         return true;
       }
       return false;
@@ -60,11 +71,12 @@ export const authOptions: NextAuthOptions = {
           email,
         };
 
-        // const { data } = await axios.post(
+        // const res = await axios.post(
         //   `${process.env.API_URL}/auth/login`,
-        //   userProfile
+        //   userProfile,
         // );
-        // const { accessToken, refreshToken } = data;
+
+        // const { accessToken, refreshToken } = res.data;
 
         token.userProfile = { ...userProfile };
       }
