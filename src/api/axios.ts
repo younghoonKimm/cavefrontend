@@ -1,8 +1,16 @@
+import { resetTokens } from '@/utils/getCookies';
 import axios from 'axios';
+import { removeCookies } from 'cookies-next';
 
-const axiosInstance = axios.create();
+const axiosInstance = axios.create({
+  withCredentials: true,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+  },
+});
 
-axios.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -14,6 +22,7 @@ axios.interceptors.response.use(
     const originalRequest = config;
 
     if (status === 401) {
+      return;
       //   const retryOriginalRequest = new Promise((resolve) => {
       //     addRefreshSubscriber((accessToken) => {
       //       originalRequest.headers.Authorization = 'Bearer ' + accessToken;
@@ -21,6 +30,11 @@ axios.interceptors.response.use(
       //     });
       //   });
       //   return retryOriginalRequest;
+    }
+
+    if (status === 403) {
+      // resetTokens();
+      // window.location.href = '/';
     }
     return Promise.reject(error);
   },

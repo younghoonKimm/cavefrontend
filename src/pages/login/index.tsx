@@ -2,16 +2,16 @@ import { NextPage } from 'next';
 import React from 'react';
 import { signIn, useSession, signOut } from 'next-auth/react';
 
-const Login: NextPage = () => {
-  const { data: session } = useSession();
+import Link from 'next/link';
 
+const Login: NextPage = () => {
   return (
     <div>
       Login
       <div>
-        {session ? (
+        {0 ? (
           <>
-            {session.user?.name}님 반갑습니다 <br />
+            님 반갑습니다 <br />
             <button type="button" onClick={() => signOut()}>
               로그아웃
             </button>
@@ -19,7 +19,8 @@ const Login: NextPage = () => {
         ) : (
           <>
             로그인되지 않았습니다 <br />
-            <button onClick={() => signIn('kakao')}>로그인</button>
+            <Link href={'http://localhost:3000/api/auth/google'}>로그인</Link>
+            <button onClick={() => getMeBtn()}>로그인</button>
           </>
         )}
       </div>

@@ -1,15 +1,28 @@
 import Head from 'next/head';
 import Image from 'next/image';
 
-import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 
 import { GetServerSideProps } from 'next';
 import { getSessionData, getTokens } from '@/utils/getServerSide';
+import { getMe, logOut } from '@/api/auth';
+import useAuth from '@/hooks/useAuth';
+import axiosInstance from '@/api/axios';
+import { useQuery } from '@tanstack/react-query';
+import { QUERYKEY_USER } from 'constants/queryKeys';
 
 export default function Home() {
-  const { data: session } = useSession();
   const router = useRouter();
+  const { user } = useAuth();
+  console.log(user);
+
+  // const { data: user } = useQuery([QUERYKEY_USER], () => getMe(), {});
+
+  const signOut = async () => {
+    const res = await getMe();
+    console.log(res);
+    // await logOut();
+  };
 
   return (
     <>
@@ -21,9 +34,9 @@ export default function Home() {
       </Head>
       <main>
         <div>
-          {session ? (
+          {0 ? (
             <>
-              {session.user?.name}님 반갑습니다 <br />
+              님 반갑습니다 <br />
               <button type="button" onClick={() => signOut()}>
                 로그아웃
               </button>
@@ -32,6 +45,9 @@ export default function Home() {
             <>
               로그인되지 않았습니다 <br />
               <button onClick={() => router.push('/login')}>로그인</button>
+              <button type="button" onClick={() => signOut()}>
+                로그아웃
+              </button>
             </>
           )}
           <p>
@@ -62,19 +78,6 @@ export default function Home() {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getSessionData(req, res);
 
-  if (session) {
-    const { cookies } = req;
-
-    //login
-    if (!cookies['CAV_ACC'] && !cookies['CAV_RFS']) {
-      const cookies = await getTokens(session);
-      if (cookies) {
-        res.setHeader('set-cookie', [...cookies]);
-      }
-    }
-  } else {
-    res.setHeader('set-cookie', []);
-  }
   return {
     props: { session },
   };

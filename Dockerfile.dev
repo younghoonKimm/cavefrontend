@@ -8,14 +8,14 @@ COPY yarn.lock ./
 
 RUN yarn install --frozen-lockfile --ignore-engines
 
+RUN rm -rf ./.next/cachek
+
 COPY . .
 
 ENV NODE_ENV dev
 
-RUN yarn run build
-
-FROM nginx
+RUN yarn build
 
 EXPOSE 3000
 
-CMD ["yarn", "start"]
+CMD ["yarn", "dev"]
