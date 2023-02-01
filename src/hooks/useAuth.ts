@@ -1,19 +1,13 @@
 import { getMe } from '@/api/auth';
 import { IUser } from '@/types/auth';
-import {
-  useQuery,
-  useQueryClient,
-  UseQueryResult,
-} from '@tanstack/react-query';
-import { AxiosError } from 'axios';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
-import { getCookie } from 'cookies-next';
 
 interface UseAuthReturnType {
   user: IUser | undefined;
 }
 
-export default function useAuth() {
+export default function useAuth(): UseAuthReturnType {
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery([QUERYKEY_USER], () => getMe(), {});

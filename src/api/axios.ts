@@ -1,6 +1,6 @@
 import { resetTokens } from '@/utils/getCookies';
 import axios from 'axios';
-import { removeCookies } from 'cookies-next';
+import { setCookie } from 'cookies-next';
 
 const axiosInstance = axios.create({
   withCredentials: true,
@@ -9,6 +9,11 @@ const axiosInstance = axios.create({
     'Access-Control-Allow-Origin': '*',
   },
 });
+
+const resetAuth = () => {
+  resetTokens();
+  window.location.href = '/';
+};
 
 axiosInstance.interceptors.response.use(
   (response) => {
@@ -22,19 +27,24 @@ axiosInstance.interceptors.response.use(
     const originalRequest = config;
 
     if (status === 401) {
-      return;
-      //   const retryOriginalRequest = new Promise((resolve) => {
-      //     addRefreshSubscriber((accessToken) => {
-      //       originalRequest.headers.Authorization = 'Bearer ' + accessToken;
-      //       resolve(axios(originalRequest));
-      //     });
-      //   });
-      //   return retryOriginalRequest;
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/getToken`,
+        );
+
+        const { accessToken, refreshToken } = res.data;
+        setCookie('CAV_ACC', accessToken);
+        setCookie('CAV_RFS', refreshToken);
+
+        const originRes = await axios.request(originalRequest);
+        return originRes;
+      } catch (error) {
+        resetAuth();
+      }
     }
 
     if (status === 403) {
-      // resetTokens();
-      // window.location.href = '/';
+      resetAuth();
     }
     return Promise.reject(error);
   },

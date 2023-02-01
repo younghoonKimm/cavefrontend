@@ -1,12 +1,13 @@
 import { IUser } from '@/types/auth';
-import { getAccessToken } from '@/utils/getCookies';
-import { AxiosError, AxiosResponse } from 'axios';
-import { CookieValueTypes, getCookie } from 'cookies-next';
+import { getAccessToken, getRefreshToken } from '@/utils/getCookies';
+
 import axiosInstance from '../axios';
 
-export async function getMe() {
+export async function getMe(): Promise<IUser> {
   const at = getAccessToken();
-  if (!at) return null;
+  const rt = getRefreshToken();
+
+  if (!at || !rt) return null;
 
   const { data } = await axiosInstance.get('/auth/me');
 

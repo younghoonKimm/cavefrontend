@@ -52,18 +52,16 @@ export default function App({
   // }
 
   return (
-    // <SessionProvider session={session}>
     <RecoilRoot>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          {/* <ErrorBoundary fallback={<div></div>}> */}
-          <GlobalStyle />
-          <Component {...pageProps} />
-          {/* </ErrorBoundary> */}
+          <ErrorBoundary fallback={<div></div>}>
+            <GlobalStyle />
+            <Component {...pageProps} />
+          </ErrorBoundary>
         </Hydrate>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </RecoilRoot>
-    // </SessionProvider>
   );
 }

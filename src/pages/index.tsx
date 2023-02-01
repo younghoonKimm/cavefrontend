@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { GetServerSideProps } from 'next';
-import { getSessionData, getTokens } from '@/utils/getServerSide';
+
 import { getMe, logOut } from '@/api/auth';
 import useAuth from '@/hooks/useAuth';
 import axiosInstance from '@/api/axios';
@@ -76,9 +76,7 @@ export default function Home() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const session = await getSessionData(req, res);
-
   return {
-    props: { session },
+    props: {},
   };
 };
