@@ -1,4 +1,5 @@
 import GlobalStyle from '@/styles/GlobalStyle';
+import theme from '@/styles/theme';
 import {
   Hydrate,
   QueryClient,
@@ -9,6 +10,7 @@ import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { useRef, useState } from 'react';
 import { RecoilRoot } from 'recoil';
+import { ThemeProvider } from 'styled-components';
 import ErrorBoundary from './ErrorBoundary';
 
 const queryClient = new QueryClient({
@@ -52,16 +54,19 @@ export default function App({
   // }
 
   return (
-    <RecoilRoot>
-      <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>
-          <ErrorBoundary fallback={<div></div>}>
-            <GlobalStyle />
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <RecoilRoot>
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps?.dehydratedState}>
+            {/* <ErrorBoundary fallback={<div></div>}> */}
+
             <Component {...pageProps} />
-          </ErrorBoundary>
-        </Hydrate>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </RecoilRoot>
+            {/* </ErrorBoundary> */}
+          </Hydrate>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </RecoilRoot>
+    </ThemeProvider>
   );
 }
