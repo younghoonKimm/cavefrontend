@@ -1,7 +1,7 @@
-import { getCookie, deleteCookie } from 'cookies-next';
+import { hasCookie, deleteCookie } from 'cookies-next';
 
-export const getAccessToken = () => getCookie('CAV_ACC');
-export const getRefreshToken = () => getCookie('CAV_RFS');
+export const getAccessToken = () => hasCookie('CAV_ACC');
+export const getRefreshToken = () => hasCookie('CAV_RFS');
 
 export const resetTokens = () => {
   deleteCookie('CAV_ACC');

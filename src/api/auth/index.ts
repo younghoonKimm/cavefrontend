@@ -7,7 +7,6 @@ export const getProfileAPI = async () => await axiosInstance.get('/auth/me');
 
 export async function getMe(): Promise<IUser> {
   const { data } = await getProfileAPI();
-
   return data.user;
 }
 

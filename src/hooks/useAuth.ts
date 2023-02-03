@@ -14,20 +14,19 @@ interface UseAuthReturnType {
 export default function useAuth(): UseAuthReturnType {
   const queryClient = useQueryClient();
 
-  const at = getAccessToken();
-  const rt = getRefreshToken();
-
-  const clearUserQuery = () => {
-    queryClient.setQueryData([QUERYKEY_USER], () => null);
-    queryClient.removeQueries([QUERYKEY_USER]);
-    resetTokens();
-  };
+  let at = getAccessToken();
+  let rt = getRefreshToken();
 
   const { data: user, isLoading: userLoading } = useQuery(
     [QUERYKEY_USER],
     () => getMe(),
     {
-      enabled: Boolean(at && rt),
+      enabled: at && rt,
+      retry: 0,
+      onError: () => {
+        return null;
+      },
+
       // onError(error: any) {
       //   if (error.request.status === 403) {
       //     clearUserQuery();
@@ -35,6 +34,13 @@ export default function useAuth(): UseAuthReturnType {
       // },
     },
   );
+
+  const clearUserQuery = () => {
+    resetTokens();
+
+    queryClient.setQueryData([QUERYKEY_USER], () => null);
+    queryClient.removeQueries([QUERYKEY_USER]);
+  };
 
   return { user, userLoading, clearUserQuery };
 }

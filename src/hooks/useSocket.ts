@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import socketIOClient, { Socket } from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 
 const socketBaseUrl = process.env.NEXT_PUBLIC_URL;
 
@@ -17,10 +17,9 @@ const useSocket = (conference?: string): [Socket | undefined, () => void] => {
   }
 
   if (!sockets[conference]) {
-    sockets[conference] = socketIOClient(`${socketBaseUrl}/ws-${conference}`, {
+    sockets[conference] = io(`${socketBaseUrl}/ws-${conference}`, {
       transports: ['websocket'],
     });
-    console.info('create socket', conference, sockets[conference]);
   }
 
   return [sockets[conference], disconnect];
