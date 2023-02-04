@@ -1,11 +1,13 @@
 import Head from 'next/head';
-import Image from 'next/image';
 
-import { useRouter } from 'next/router';
+import {
+  GetServerSideProps,
+  GetStaticPaths,
+  GetStaticProps,
+  NextPage,
+} from 'next';
 
-import { GetServerSideProps, NextPage } from 'next';
-
-import { getProfileAPI, logOutAPI } from '@/api/auth';
+import { getMe, getProfileAPI, logOutAPI } from '@/api/auth';
 import useAuth from '@/hooks/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -13,27 +15,27 @@ import { QUERYKEY_USER } from 'constants/queryKeys';
 import { Suspense, useEffect, useState } from 'react';
 import useSocket from '@/hooks/useSocket';
 import Layout from '@/components/templates/Layout/Layout';
+import axiosInstance from '@/api/axios';
+import axios from 'axios';
 
 const Home: NextPage = () => {
-  const router = useRouter();
+  // const { user } = useAuth();
+  // const [socket, disconnect] = useSocket('1');
+  // console.log(user);
+  // useEffect(() => {
+  //   if (user) {
+  //     socket?.emit('login', {
+  //       id: 'socket',
+  //       conference: ['1', '2', '3'],
+  //     });
+  //   }
+  // }, [user, socket]);
 
-  const { user } = useAuth();
-  const [socket, disconnect] = useSocket('1');
-
-  useEffect(() => {
-    if (user) {
-      socket?.emit('login', {
-        id: 'ds',
-        conference: ['1', '2', '3'],
-      });
-    }
-  }, [user, socket]);
-
-  useEffect(() => {
-    return () => {
-      disconnect();
-    };
-  }, [user, disconnect]);
+  // useEffect(() => {
+  //   return () => {
+  //     disconnect();
+  //   };
+  // }, [user, disconnect]);
 
   return (
     <>
@@ -46,23 +48,6 @@ const Home: NextPage = () => {
       <Layout>
         <div>
           <Suspense fallback={<div></div>}></Suspense>
-
-          <p></p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
         </div>
       </Layout>
     </>
@@ -72,12 +57,15 @@ const Home: NextPage = () => {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const queryClient = new QueryClient();
 
-  const accessToken = req.cookies['CAV_ACC'];
-
-  if (accessToken) {
-    await queryClient.prefetchQuery([QUERYKEY_USER], getProfileAPI);
+  try {
+    const ress = await axiosInstance('/auth/me').then((re) => console.log(re));
+    // console.log(ress);
+  } catch (e) {
+    console.log(e, 'errr');
   }
 
+  // const c = await queryClient.prefetchQuery([QUERYKEY_USER], getMe);
+  // console.log(c);
   return {
     props: { dehydratedState: dehydrate(queryClient) },
   };

@@ -21,6 +21,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
+    console.log(error);
     const {
       config,
       response: { status },
@@ -29,9 +30,7 @@ axiosInstance.interceptors.response.use(
 
     if (status === 401) {
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/getToken`,
-        );
+        const res = await axios.get(`/auth/getToken`);
 
         const { accessToken, refreshToken } = res.data;
         setCookie('CAV_ACC', accessToken);

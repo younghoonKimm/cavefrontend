@@ -10,9 +10,7 @@
     "lint": "next lint",
     "lint-fix": "eslint \"**/*.{ts,tsx}\" --ext .ts,.tsx --fix",
     "lint-staged": "lint-staged",
-    "test-coverage": "jest",
-    "cypress": "cypress open",
-    "cypress:headless": "cypress run"
+    "test-coverage": "jest"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
@@ -63,7 +61,6 @@
   },
   "devDependencies": {
     "@types/socket.io-client": "^3.0.0",
-    "cypress": "^12.4.1",
     "husky": "^8.0.3"
   }
 }

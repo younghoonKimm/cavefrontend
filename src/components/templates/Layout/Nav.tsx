@@ -30,7 +30,7 @@ function Nav() {
       {user ? (
         <>
           <div>
-            <p>{user.name}님 환영합니다</p>
+            <span>{user.name}님 환영합니다</span>
           </div>
           <DefaultButton
             type="button"

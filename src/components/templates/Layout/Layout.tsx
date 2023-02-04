@@ -18,9 +18,7 @@ function Layout({ children, isNav = false }: LayoutProps) {
 
   return (
     <div>
-      <header>
-        <Nav />
-      </header>
+      <header>{/* <Nav /> */}</header>
       <main role="main"> {showComponent ? children : null}</main>
       <footer></footer>
     </div>

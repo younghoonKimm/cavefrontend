@@ -6,7 +6,7 @@ import { QUERYKEY_USER } from 'constants/queryKeys';
 import { GetServerSideProps, NextPage } from 'next';
 import React, { useCallback, useEffect, useState } from 'react';
 
-const ConferrenceDetail: NextPage = () => {
+const ConferenceDetail: NextPage = () => {
   const [socket, disconnect] = useSocket('1');
   const { user, clearUserQuery } = useAuth();
   const [mes, setMes] = useState<any>('');
@@ -26,7 +26,7 @@ const ConferrenceDetail: NextPage = () => {
     return () => {
       disconnect();
     };
-  }, []);
+  }, [disconnect]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
@@ -59,4 +59,4 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   };
 };
 
-export default ConferrenceDetail;
+export default ConferenceDetail;
