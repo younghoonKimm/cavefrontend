@@ -7,7 +7,7 @@ import {
   NextPage,
 } from 'next';
 
-import { getMe, getProfileAPI, logOutAPI } from '@/api/auth';
+import { asd, getMe, getProfileAPI, logOutAPI } from '@/api/auth';
 import useAuth from '@/hooks/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -16,7 +16,7 @@ import { Suspense, useEffect, useState } from 'react';
 import useSocket from '@/hooks/useSocket';
 import Layout from '@/components/templates/Layout/Layout';
 import axiosInstance from '@/api/axios';
-import axios from 'axios';
+import axios, { Axios } from 'axios';
 
 const Home: NextPage = () => {
   // const { user } = useAuth();
@@ -57,15 +57,10 @@ const Home: NextPage = () => {
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const queryClient = new QueryClient();
 
-  try {
-    const ress = await axiosInstance('/auth/me').then((re) => console.log(re));
-    // console.log(ress);
-  } catch (e) {
-    console.log(e, 'errr');
-  }
+  const a = await getMe();
 
   // const c = await queryClient.prefetchQuery([QUERYKEY_USER], getMe);
-  // console.log(c);
+
   return {
     props: { dehydratedState: dehydrate(queryClient) },
   };

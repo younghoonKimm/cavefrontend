@@ -4,16 +4,10 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
 
-  async rewrites() {
-    return {
-      beforeFiles: [],
-    };
-  },
   webpack: (config, context) => {
     config.watchOptions = {
       poll: 1000,
