@@ -1,4 +1,4 @@
-import { getMe } from '@/api/auth';
+import { getMe } from '@/api/auth/auth';
 import { IUser } from '@/types/auth';
 import { resetTokens } from '@/utils/getCookies';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

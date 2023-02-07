@@ -1,6 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
-export function middleware(request: NextRequest) {
-  console.log(request, 'request');
-  return NextResponse.next();
-}
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const proxy = createProxyMiddleware({
+  target: 'http:localhost:3000/api',
+  pathRewrite: { '^/api': '/api' },
+  ws: true,
+  //the data server
+  changeOrigin: true,
+});
+
+export default proxy;

@@ -1,7 +1,7 @@
-import useAuth from '@/hooks/useAuth';
 import { resetTokens } from '@/utils/getCookies';
 import axios from 'axios';
 import { setCookie } from 'cookies-next';
+import { getNewTokenAPI } from './auth/auth';
 
 const axiosInstance = axios.create({
   withCredentials: true,
@@ -13,7 +13,36 @@ const axiosInstance = axios.create({
 
 const resetAuth = () => {
   resetTokens();
-  window.location.href = '/';
+  // if (window) {
+  //   window.location.href = '/';
+  // }
+};
+
+export const refreshToken = async (error: any) => {
+  const { config, response } = error;
+  const originalRequest = config;
+  const { status } = response;
+  if (status === 401) {
+    try {
+      const newToken = await getNewTokenAPI();
+
+      const { accessToken, refreshToken } = newToken.data;
+
+      setCookie('CAV_ACC', accessToken);
+      setCookie('CAV_RFS', refreshToken);
+
+      const originRes = await axiosInstance.request(originalRequest);
+      return originRes;
+    } catch (error) {
+      resetAuth();
+    }
+  }
+
+  if (status === 403) {
+    return resetAuth();
+  }
+
+  return Promise.reject(error);
 };
 
 axiosInstance.interceptors.response.use(
@@ -21,32 +50,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    console.log(error);
-    const {
-      config,
-      response: { status },
-    } = error;
-    const originalRequest = config;
-
-    if (status === 401) {
-      try {
-        const res = await axios.get(`/auth/getToken`);
-
-        const { accessToken, refreshToken } = res.data;
-        setCookie('CAV_ACC', accessToken);
-        setCookie('CAV_RFS', refreshToken);
-
-        const originRes = await axios.request(originalRequest);
-        return originRes;
-      } catch (error) {
-        resetAuth();
-      }
-    }
-
-    if (status === 403) {
-      resetAuth();
-    }
-    return Promise.reject(error);
+    return refreshToken(error);
   },
 );
 

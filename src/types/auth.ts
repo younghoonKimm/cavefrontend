@@ -1,7 +1,7 @@
 interface User {
   name: string;
   email: string;
-  img?: string;
+  profileImg?: string;
 }
 
 export type IUser = User | null;

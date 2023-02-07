@@ -1,13 +1,7 @@
 import Head from 'next/head';
 
-import {
-  GetServerSideProps,
-  GetStaticPaths,
-  GetStaticProps,
-  NextPage,
-} from 'next';
-
-import { asd, getMe, getProfileAPI, logOutAPI } from '@/api/auth';
+import { GetServerSideProps, NextPage } from 'next';
+import { getMe, getNewTokenAPI } from '@/api/auth/auth';
 import useAuth from '@/hooks/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -15,27 +9,28 @@ import { QUERYKEY_USER } from 'constants/queryKeys';
 import { Suspense, useEffect, useState } from 'react';
 import useSocket from '@/hooks/useSocket';
 import Layout from '@/components/templates/Layout/Layout';
+
 import axiosInstance from '@/api/axios';
-import axios, { Axios } from 'axios';
+import Nav from '@/components/templates/Layout/Nav';
 
 const Home: NextPage = () => {
-  // const { user } = useAuth();
-  // const [socket, disconnect] = useSocket('1');
-  // console.log(user);
-  // useEffect(() => {
-  //   if (user) {
-  //     socket?.emit('login', {
-  //       id: 'socket',
-  //       conference: ['1', '2', '3'],
-  //     });
-  //   }
-  // }, [user, socket]);
+  const { user } = useAuth();
+  const [socket, disconnect] = useSocket('1');
 
-  // useEffect(() => {
-  //   return () => {
-  //     disconnect();
-  //   };
-  // }, [user, disconnect]);
+  useEffect(() => {
+    if (user) {
+      socket?.emit('login', {
+        id: 'socket',
+        conference: ['1', '2', '3'],
+      });
+    }
+  }, [user, socket]);
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [user, disconnect]);
 
   return (
     <>
@@ -47,7 +42,9 @@ const Home: NextPage = () => {
       </Head>
       <Layout>
         <div>
-          <Suspense fallback={<div></div>}></Suspense>
+          <Suspense fallback={<div></div>}>
+            <Nav />
+          </Suspense>
         </div>
       </Layout>
     </>
@@ -56,10 +53,27 @@ const Home: NextPage = () => {
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const queryClient = new QueryClient();
+  const { CAV_ACC } = req.cookies;
+  const { cookie } = req.headers;
 
-  const a = await getMe();
+  if (cookie && CAV_ACC) {
+    try {
+      axiosInstance.defaults.headers.cookie = cookie;
+      axiosInstance.defaults.baseURL = 'http://backend:3001/api';
+      const { headers, data: token } = await getNewTokenAPI();
 
-  // const c = await queryClient.prefetchQuery([QUERYKEY_USER], getMe);
+      if (headers['set-cookie']) {
+        res.setHeader('set-cookie', headers['set-cookie']);
+        axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
+        await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
+          staleTime: 900,
+        });
+      }
+    } catch (e) {
+    } finally {
+      axiosInstance.defaults.headers.cookie = '';
+    }
+  }
 
   return {
     props: { dehydratedState: dehydrate(queryClient) },

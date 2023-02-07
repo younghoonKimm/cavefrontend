@@ -1,4 +1,4 @@
-import { getProfileAPI } from '@/api/auth';
+import { getProfileAPI } from '@/api/auth/auth';
 import useAuth from '@/hooks/useAuth';
 import useSocket from '@/hooks/useSocket';
 import { dehydrate, QueryClient } from '@tanstack/react-query';

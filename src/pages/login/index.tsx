@@ -1,7 +1,6 @@
 import { NextPage } from 'next';
 import React from 'react';
-import { signIn, useSession, signOut } from 'next-auth/react';
-import { getMe } from '@/api/auth';
+import { getMe } from '@/api/auth/auth';
 import Link from 'next/link';
 
 const Login: NextPage = () => {
@@ -23,7 +22,7 @@ const Login: NextPage = () => {
         ) : (
           <>
             로그인되지 않았습니다 <br />
-            <Link href={'http://localhost:3000/api/auth/google'}>로그인</Link>
+            <Link href={'http://localhost:3002/api/auth/google'}>로그인</Link>
             <button onClick={() => getMeBtn()}>로그인</button>
           </>
         )}
