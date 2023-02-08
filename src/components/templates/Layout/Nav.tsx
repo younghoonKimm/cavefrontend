@@ -1,16 +1,27 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
+import { useRecoilState } from 'recoil';
 
 import { logOutAPI } from '@/api/auth/auth';
 import { DefaultButton } from '@/components/atoms/Button';
-import useAuth from '@/hooks/useAuth';
-import Image from 'next/image';
-import { useEffect } from 'react';
+import useAuth from '@/hooks/api/useAuth';
+
 import { resetTokens } from '@/utils/getCookies';
+import { modalAtoms } from '@/states/common';
 
 function Nav() {
   const router = useRouter();
   const { user, clearUserQuery } = useAuth();
+
+  const [modalOption, setModalOption] = useRecoilState(modalAtoms);
+
+  useEffect(() => {
+    if (!user) {
+      resetTokens();
+    }
+  }, [user]);
 
   const signUp = () => router.push('/login');
 
@@ -21,40 +32,48 @@ function Nav() {
       if (res) {
         clearUserQuery();
       }
-
-      return res;
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (!user) {
-      resetTokens();
-    }
-  }, [user]);
+  const onOpenModal = () => setModalOption({ ...modalOption, isModal: true });
 
   return (
     <StyledNav>
       {user ? (
         <>
           <div>
-            <StyledProfileImg>
-              <Image src={user.profileImg} alt="image" width="52" height="52" />
-            </StyledProfileImg>
-
-            <span>{user.name}님 환영합니다</span>
+            {user.profileImg && (
+              <StyledProfileImg>
+                <Image
+                  src={user.profileImg}
+                  alt="image"
+                  width="52"
+                  height="52"
+                />
+              </StyledProfileImg>
+            )}
+            <span>{user.name ?? '회원'}님 환영합니다</span>
           </div>
-          <DefaultButton
-            type="button"
-            buttonText="로그아웃"
-            onClick={signOut}
-          />
+          <div>
+            <DefaultButton
+              type="button"
+              buttonText="생성"
+              onClick={onOpenModal}
+            />
+            <DefaultButton
+              type="button"
+              buttonText="로그아웃"
+              onClick={signOut}
+            />
+          </div>
         </>
       ) : (
         <DefaultButton type="button" buttonText="로그인" onClick={signUp} />
       )}
     </StyledNav>
+    // </Suspense>
   );
 }
 

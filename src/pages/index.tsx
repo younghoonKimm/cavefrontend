@@ -2,7 +2,7 @@ import Head from 'next/head';
 
 import { GetServerSideProps, NextPage } from 'next';
 import { getMe, getNewTokenAPI } from '@/api/auth/auth';
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
@@ -41,11 +41,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <div>
-          <Suspense fallback={<div></div>}>
-            <Nav />
-          </Suspense>
-        </div>
+        <section>{user ? <div>List</div> : <div></div>}</section>
       </Layout>
     </>
   );

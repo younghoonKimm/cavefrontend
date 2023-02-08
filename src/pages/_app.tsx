@@ -1,4 +1,3 @@
-import Modal from '@/components/atoms/Modal';
 import GlobalStyle from '@/styles/GlobalStyle';
 import theme from '@/styles/theme';
 import {
@@ -7,9 +6,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { SessionProvider } from 'next-auth/react';
-import type { AppContext, AppProps } from 'next/app';
-import { useRef, useState } from 'react';
+import type { AppProps } from 'next/app';
 import { RecoilRoot } from 'recoil';
 import { ThemeProvider } from 'styled-components';
 import ErrorBoundary from './ErrorBoundary';
@@ -42,7 +39,7 @@ export default function App({
       <RecoilRoot>
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps.dehydratedState}>
-            <ErrorBoundary fallback={<Modal />}>
+            <ErrorBoundary fallback={<div></div>}>
               <Component {...pageProps} />
             </ErrorBoundary>
           </Hydrate>

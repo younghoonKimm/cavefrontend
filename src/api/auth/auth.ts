@@ -5,7 +5,7 @@ import axiosInstance from '../axios';
 
 export const getProfileAPI = async () => await axiosInstance.get('/auth/me');
 
-export async function getMe(): Promise<IUser | AxiosError> {
+export async function getMe(): Promise<IUser> {
   const res = await getProfileAPI();
 
   const { data } = res;

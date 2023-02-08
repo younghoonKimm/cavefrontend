@@ -1,5 +1,5 @@
 import { getProfileAPI } from '@/api/auth/auth';
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/hooks/api/useAuth';
 import useSocket from '@/hooks/useSocket';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
