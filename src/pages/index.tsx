@@ -5,17 +5,20 @@ import { getMe, getNewTokenAPI } from '@/api/auth/auth';
 import useAuth from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
-import { QUERYKEY_USER } from 'constants/queryKeys';
-import { Suspense, useEffect, useState } from 'react';
+import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
+import { Suspense, useEffect } from 'react';
 import useSocket from '@/hooks/useSocket';
 import Layout from '@/components/templates/Layout/Layout';
 
 import axiosInstance from '@/api/axios';
-import Nav from '@/components/templates/Layout/Nav';
+
+import { getConference, useGetConference } from '@/hooks/api/useConference';
 
 const Home: NextPage = () => {
   const { user } = useAuth();
+
   const [socket, disconnect] = useSocket('1');
+  const { conferences } = useGetConference(user);
 
   useEffect(() => {
     if (user) {
@@ -64,6 +67,16 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
         await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
           staleTime: 900,
         });
+
+        const ss = await queryClient.prefetchQuery(
+          [QUERYKEY_CONFERENCE],
+          () => getConference(),
+          {
+            staleTime: 900,
+          },
+        );
+
+        console.log(ss);
       }
     } catch (e) {
     } finally {

@@ -1,5 +1,4 @@
 import { IUser } from '@/types/auth';
-import { AxiosError } from 'axios';
 
 import axiosInstance from '../axios';
 
