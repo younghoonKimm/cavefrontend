@@ -10,6 +10,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { QUERYKEY_CONFERENCE } from 'constants/queryKeys';
+import useModal from '../useModal';
 
 async function createConference(conference: any): Promise<void> {
   await postConferenceAPI(conference);
@@ -23,11 +24,14 @@ export function useCreateConference(): UseMutateFunction<
 > {
   const queryClient = useQueryClient();
 
+  const { onCloseModal } = useModal();
+
   const { mutate } = useMutation(
     (conference: any) => createConference(conference),
     {
       onSuccess: () => {
         queryClient.invalidateQueries([QUERYKEY_CONFERENCE]);
+        onCloseModal();
       },
     },
   );

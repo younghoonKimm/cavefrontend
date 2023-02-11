@@ -8,13 +8,12 @@ const GlobalStyle = createGlobalStyle`
         padding: 0;
         box-sizing: border-box;
         letter-spacing: -0.25px;
-        line-height: 1.24;
+        line-height: 1.2;
     }
     html, body, #__next {
         height: 100%;
     }
     body{
-        background-color: #ffffff;
         /* font-family: Pretendard, -apple-system, 'Apple SD Gothic Neo','Malgun Gothic', sans-serif; */
         font-weight: 400;
         /* overflow: hidden; */
@@ -41,6 +40,13 @@ const GlobalStyle = createGlobalStyle`
         background: #d6d6d7;
         }
     }
+    
+    button {
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
 `;
 
 export default GlobalStyle;

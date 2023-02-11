@@ -1,12 +1,14 @@
 import { NextPage } from 'next';
 import React from 'react';
-import { getMe } from '@/api/auth/auth';
+import { getMe } from '@/hooks/api/useAuth';
 import Link from 'next/link';
 
 const Login: NextPage = () => {
   const getMeBtn = async () => {
     await getMe();
   };
+
+  const signOut = async () => {};
 
   return (
     <div>

@@ -1,8 +1,8 @@
 import Head from 'next/head';
 
 import { GetServerSideProps, NextPage } from 'next';
-import { getMe, getNewTokenAPI } from '@/api/auth/auth';
-import useAuth from '@/hooks/api/useAuth';
+import { getNewTokenAPI } from '@/api/auth/auth';
+import useAuth, { getMe } from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
@@ -13,6 +13,7 @@ import Layout from '@/components/templates/Layout/Layout';
 import axiosInstance from '@/api/axios';
 
 import { getConference, useGetConference } from '@/hooks/api/useConference';
+import Conferences from '@/components/organisms/Conferences/Conferences';
 
 const Home: NextPage = () => {
   const { user } = useAuth();
@@ -44,7 +45,15 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        <section>{user ? <div>List</div> : <div></div>}</section>
+        <section>
+          {user ? (
+            <Suspense fallback={<div>loading....</div>}>
+              {conferences ? <Conferences conferences={conferences} /> : null}
+            </Suspense>
+          ) : (
+            <div></div>
+          )}
+        </section>
       </Layout>
     </>
   );
@@ -68,15 +77,13 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
           staleTime: 900,
         });
 
-        const ss = await queryClient.prefetchQuery(
+        await queryClient.prefetchQuery(
           [QUERYKEY_CONFERENCE],
           () => getConference(),
           {
             staleTime: 900,
           },
         );
-
-        console.log(ss);
       }
     } catch (e) {
     } finally {

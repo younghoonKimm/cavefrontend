@@ -10,12 +10,13 @@ import useAuth from '@/hooks/api/useAuth';
 
 import { resetTokens } from '@/utils/getCookies';
 import { modalAtoms } from '@/states/common';
+import useModal from '@/hooks/useModal';
 
 function Nav() {
   const router = useRouter();
   const { user, clearUserQuery } = useAuth();
 
-  const [modalOption, setModalOption] = useRecoilState(modalAtoms);
+  const { openModal } = useModal();
 
   useEffect(() => {
     if (!user) {
@@ -37,7 +38,7 @@ function Nav() {
     }
   };
 
-  const onOpenModal = () => setModalOption({ ...modalOption, isModal: true });
+  const onOpenModal = () => openModal('conferenceCreate');
 
   return (
     <StyledNav>

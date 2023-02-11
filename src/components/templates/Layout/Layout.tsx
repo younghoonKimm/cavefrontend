@@ -6,6 +6,7 @@ import Nav from './Nav';
 import { useRecoilState } from 'recoil';
 import { modalAtoms } from '@/states/common';
 import Modal from '@/components/atoms/Modal/Modal';
+import useModal from '@/hooks/useModal';
 
 interface LayoutProps extends Comp {
   isNav?: boolean;
@@ -13,14 +14,13 @@ interface LayoutProps extends Comp {
 
 function Layout({ children, isNav = false }: LayoutProps) {
   const [showComponent, setShowComponent] = useState(false);
-  const [modalOption, setModalOption] = useRecoilState(modalAtoms);
+
+  const { modalOption, onCloseModal } = useModal();
   const { isModal, modalType } = modalOption;
 
   useEffect(() => {
     setShowComponent(true);
   }, []);
-
-  const onCloseModal = () => setModalOption({ ...modalOption, isModal: false });
 
   return (
     <div>

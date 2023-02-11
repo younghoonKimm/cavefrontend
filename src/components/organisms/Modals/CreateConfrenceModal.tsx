@@ -1,8 +1,6 @@
 import useAuth from '@/hooks/api/useAuth';
-import {
-  useCreateConference,
-  useGetConference,
-} from '@/hooks/api/useConference';
+import { useCreateConference } from '@/hooks/api/useConference';
+
 import { useEffect, useState } from 'react';
 
 function CreateConfrenceModal() {
