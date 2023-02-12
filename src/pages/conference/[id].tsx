@@ -2,33 +2,44 @@ import { getNewTokenAPI, getProfileAPI } from '@/api/auth/auth';
 import axiosInstance from '@/api/axios';
 import Layout from '@/components/templates/Layout/Layout';
 import useAuth, { getMe } from '@/hooks/api/useAuth';
-import useSocket from '@/hooks/useSocket';
+import useSocket, { createSocketConference } from '@/hooks/useSocket';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
 import { GetServerSideProps, NextPage } from 'next';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 
 const ConferenceDetail: NextPage = () => {
-  const [socket, disconnect] = useSocket('1');
-
+  const router = useRouter();
+  // const { workspace } = useParams<{ workspace: string }>();
+  const { id } = router.query;
+  const { user } = useAuth();
+  const [socket, disconnect] = useSocket(user?.id);
   const [mes, setMes] = useState<any>('');
 
-  // useEffect(() => {
-  //   if (user) {
-  //     socket?.on('messaged', (data) => {
-  //       setMes(data);
-  //     });
-  //     return () => {
-  //       socket?.off('messaged', (data) => setMes(data));
-  //     };
-  //   }
-  // }, [socket, mes, user]);
+  useEffect(() => {
+    // socket?.emit('s', {
+    //   id: 'socket' + Math.random(),
+    //   conferences: ['sub', '1'],
+    // });
+  }, [socket]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     disconnect();
-  //   };
-  // }, [disconnect]);
+  useEffect(() => {
+    if (user) {
+      socket?.on('messaged', (data) => {
+        setMes(data);
+      });
+      return () => {
+        socket?.off('messaged', (data) => setMes(data));
+      };
+    }
+  }, [socket, user]);
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
@@ -47,33 +58,41 @@ const ConferenceDetail: NextPage = () => {
   );
 };
 
-// export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-//   const queryClient = new QueryClient();
-//   const { CAV_ACC } = req.cookies;
-//   const { cookie } = req.headers;
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  res,
+  params,
+}) => {
+  const queryClient = new QueryClient();
+  const { CAV_ACC } = req.cookies;
+  const { cookie } = req.headers;
 
-//   if (cookie && CAV_ACC) {
-//     try {
-//       axiosInstance.defaults.headers.cookie = cookie;
-//       axiosInstance.defaults.baseURL = 'http://backend:3001/api';
-//       const { headers, data: token } = await getNewTokenAPI();
+  const id = params?.id as string;
 
-//       if (headers['set-cookie']) {
-//         res.setHeader('set-cookie', headers['set-cookie']);
-//         axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
-//         await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
-//           staleTime: 900,
-//         });
-//       }
-//     } catch (e) {
-//     } finally {
-//       axiosInstance.defaults.headers.cookie = '';
-//     }
-//   }
+  if (cookie && CAV_ACC) {
+    try {
+      axiosInstance.defaults.headers.cookie = cookie;
+      axiosInstance.defaults.baseURL = 'http://backend:3001/api';
+      const { headers, data: token } = await getNewTokenAPI();
 
-//   return {
-//     props: { dehydratedState: dehydrate(queryClient) },
-//   };
-// };
+      if (headers['set-cookie']) {
+        res.setHeader('set-cookie', headers['set-cookie']);
+        axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
+        await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
+          staleTime: 900,
+        });
+
+        createSocketConference(id);
+      }
+    } catch (e) {
+    } finally {
+      axiosInstance.defaults.headers.cookie = '';
+    }
+  }
+
+  return {
+    props: { dehydratedState: dehydrate(queryClient) },
+  };
+};
 
 export default ConferenceDetail;

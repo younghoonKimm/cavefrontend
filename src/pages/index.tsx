@@ -18,17 +18,17 @@ import Conferences from '@/components/organisms/Conferences/Conferences';
 const Home: NextPage = () => {
   const { user } = useAuth();
 
-  const [socket, disconnect] = useSocket('1');
+  const [socket, disconnect] = useSocket(user?.id);
   const { conferences } = useGetConference(user);
 
   useEffect(() => {
-    if (user) {
+    if (user && conferences) {
       socket?.emit('login', {
         id: 'socket',
-        conference: ['1', '2', '3'],
+        conferences: conferences.map((conference) => conference.id),
       });
     }
-  }, [user, socket]);
+  }, [user, conferences, socket]);
 
   useEffect(() => {
     return () => {

@@ -1,8 +1,11 @@
 import {
+  deleteConferenceAPI,
   getConferenceAPI,
   postConferenceAPI,
 } from '@/api/conference/conference';
+import Conference from '@/components/molecules/Conference/Conference';
 import { IUser } from '@/types/auth';
+import { IConference } from '@/types/conference';
 import {
   UseMutateFunction,
   useMutation,
@@ -39,13 +42,15 @@ export function useCreateConference(): UseMutateFunction<
   return mutate;
 }
 
-export async function getConference(): Promise<void> {
+export async function getConference(): Promise<IConference[]> {
   const res = await getConferenceAPI();
 
   return res.data?.conferences;
 }
 
-export function useGetConference(auth: IUser | undefined) {
+export function useGetConference(auth: IUser | undefined): {
+  conferences: IConference[] | undefined;
+} {
   const { data: conferences, isLoading: userLoading } = useQuery(
     [QUERYKEY_CONFERENCE],
     getConference,
@@ -60,4 +65,44 @@ export function useGetConference(auth: IUser | undefined) {
   );
 
   return { conferences };
+}
+
+export async function deleteConference(id: string): Promise<void> {
+  await deleteConferenceAPI(id);
+}
+
+export function useDeleteConference() {
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteConferenceMutate } = useMutation(
+    (id: string) => deleteConference(id),
+    {
+      onMutate: (id: string) => {
+        const oldConferences: IConference[] | undefined =
+          queryClient.getQueryData([QUERYKEY_CONFERENCE]);
+
+        if (oldConferences) {
+          queryClient.cancelQueries([QUERYKEY_CONFERENCE]);
+          queryClient.setQueryData(
+            [QUERYKEY_CONFERENCE],
+            (oldConferences: IConference[] | undefined) =>
+              oldConferences?.filter((conference) => conference.id !== id),
+          );
+
+          return () =>
+            queryClient.setQueryData([QUERYKEY_CONFERENCE], oldConferences);
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries([QUERYKEY_CONFERENCE]);
+      },
+      onError: (err, values, rollback) => {
+        if (rollback) {
+          rollback();
+        }
+      },
+    },
+  );
+
+  return { deleteConferenceMutate };
 }

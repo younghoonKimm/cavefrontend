@@ -5,3 +5,7 @@ export const postConferenceAPI = async (conferenceData: any) =>
 
 export const getConferenceAPI = async () =>
   await axiosInstance.get('/conference');
+
+export const deleteConferenceAPI = async (id: string) => {
+  await axiosInstance.delete(`/conference/${id}`);
+};
