@@ -3,12 +3,13 @@ import io, { Socket } from 'socket.io-client';
 
 const socketBaseUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
 
+export const sockets: { [key: string]: Socket } = {};
+
 export const createSocketConference = (conference: string) => {
   sockets[conference] = io(`${socketBaseUrl}/ws-${conference}`, {
     transports: ['websocket'],
   });
 };
-const sockets: { [key: string]: Socket } = {};
 
 const useSocket = (conference?: string): [Socket | undefined, () => void] => {
   const disconnect = useCallback(() => {
@@ -26,8 +27,6 @@ const useSocket = (conference?: string): [Socket | undefined, () => void] => {
     sockets[conference] = io(`${socketBaseUrl}/ws-${conference}`, {
       transports: ['websocket'],
     });
-    console.log(sockets[conference]);
-    // createSocketConference(conference);
   }
 
   return [sockets[conference], disconnect];

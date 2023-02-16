@@ -2,7 +2,7 @@ import { getProfileAPI } from '@/api/auth/auth';
 import { IUser } from '@/types/auth';
 import { resetTokens } from '@/utils/getCookies';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERYKEY_USER } from 'constants/queryKeys';
+import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
 import { getAccessToken, getRefreshToken } from '@/utils/getCookies';
 
 interface UseAuthReturnType {
@@ -13,10 +13,9 @@ interface UseAuthReturnType {
 
 export async function getMe(): Promise<IUser> {
   const res = await getProfileAPI();
-
   const { data } = res;
 
-  return data.user;
+  return data?.user;
 }
 
 export default function useAuth(): UseAuthReturnType {
@@ -30,11 +29,9 @@ export default function useAuth(): UseAuthReturnType {
     () => getMe(),
     {
       enabled: at && rt,
-      retry: 1,
+      retry: 0,
 
-      onError: (err) => {
-        return null;
-      },
+      onError: (err) => {},
     },
   );
 
@@ -43,6 +40,7 @@ export default function useAuth(): UseAuthReturnType {
 
     queryClient.setQueryData([QUERYKEY_USER], () => null);
     queryClient.removeQueries([QUERYKEY_USER]);
+    queryClient.removeQueries([QUERYKEY_CONFERENCE]);
   };
 
   return { user, userLoading, clearUserQuery };

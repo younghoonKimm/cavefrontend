@@ -3,7 +3,6 @@ import {
   getConferenceAPI,
   postConferenceAPI,
 } from '@/api/conference/conference';
-import Conference from '@/components/molecules/Conference/Conference';
 import { IUser } from '@/types/auth';
 import { IConference } from '@/types/conference';
 import {
@@ -45,22 +44,18 @@ export function useCreateConference(): UseMutateFunction<
 export async function getConference(): Promise<IConference[]> {
   const res = await getConferenceAPI();
 
-  return res.data?.conferences;
+  return res?.data?.conferences;
 }
 
 export function useGetConference(auth: IUser | undefined): {
   conferences: IConference[] | undefined;
 } {
+  console.log(auth);
   const { data: conferences, isLoading: userLoading } = useQuery(
     [QUERYKEY_CONFERENCE],
     getConference,
     {
       enabled: Boolean(auth),
-      // onError(error: any) {
-      //   if (error.request.status === 403) {
-      //     clearUserQuery();
-      //   }
-      // },
     },
   );
 

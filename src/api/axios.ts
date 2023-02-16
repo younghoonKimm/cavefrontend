@@ -22,6 +22,7 @@ export const refreshToken = async (error: any) => {
   const { config, response } = error;
   const originalRequest = config;
   const { status } = response;
+
   if (status === 401) {
     try {
       const newToken = await getNewTokenAPI();

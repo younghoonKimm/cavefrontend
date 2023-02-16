@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -74,7 +74,6 @@ function Nav() {
         <DefaultButton type="button" buttonText="로그인" onClick={signUp} />
       )}
     </StyledNav>
-    // </Suspense>
   );
 }
 
@@ -82,7 +81,7 @@ const StyledNav = styled.nav`
   width: 100%;
   display: flex;
   justify-content: space-between;
-  background: yellow;
+  background: #fff;
 `;
 
 const StyledProfileImg = styled.div`
