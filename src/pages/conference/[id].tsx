@@ -17,39 +17,37 @@ const ConferenceDetail: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useAuth();
-  // const [socket, disconnect] = useSocket(id as string);
+  const [socket, disconnect] = useSocket(id as string);
   const [mes, setMes] = useState<any>('');
-
-  const socket = 1;
 
   useEffect(() => {
     if (user && socket) {
-      // socket.emit('login', {
-      //   id: user?.id,
-      //   conferences: [id],
-      // });
+      socket.emit('login', {
+        id: user?.id,
+        conferences: [id],
+      });
     }
   }, [socket, user, id]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     disconnect();
-  //   };
-  // }, [disconnect]);
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
 
   useEffect(() => {
-    // if (user && socket) {
-    //   socket.on('messaged', (data) => {
-    //     setMes(data);
-    //   });
-    //   return () => {
-    //     socket.off('messaged', (data) => setMes(data));
-    //   };
-    // }
+    if (user && socket) {
+      socket.on('messaged', (data) => {
+        setMes(data);
+      });
+      return () => {
+        socket.off('messaged', (data) => setMes(data));
+      };
+    }
   }, [socket, user, mes]);
 
   const onSubmit = useCallback(() => {
-    // socket?.emit('message', mes);
+    socket?.emit('message', mes);
   }, [socket, mes]);
 
   return (
@@ -94,8 +92,7 @@ export const getServerSideProps: GetServerSideProps = async ({
         setAxiosDefaultHeaderCookie(
           `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
         );
-        console.log(token);
-        await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
+        await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
           staleTime: 900,
         });
       }

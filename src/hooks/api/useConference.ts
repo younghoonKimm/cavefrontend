@@ -50,7 +50,6 @@ export async function getConference(): Promise<IConference[]> {
 export function useGetConference(auth: IUser | undefined): {
   conferences: IConference[] | undefined;
 } {
-  console.log(auth);
   const { data: conferences, isLoading: userLoading } = useQuery(
     [QUERYKEY_CONFERENCE],
     getConference,

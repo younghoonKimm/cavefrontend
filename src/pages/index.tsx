@@ -14,6 +14,10 @@ import axiosInstance from '@/api/axios';
 
 import { getConference, useGetConference } from '@/hooks/api/useConference';
 import Conferences from '@/components/organisms/Conferences/Conferences';
+import {
+  setAxiosDefaultForServerSide,
+  setAxiosDefaultHeaderCookie,
+} from '@/utils/getServerSide';
 
 const Home: NextPage = () => {
   const { user } = useAuth();
@@ -31,10 +35,8 @@ const Home: NextPage = () => {
       </Head>
       <Layout>
         <section>
-          {user ? (
-            <>
-              {conferences ? <Conferences conferences={conferences} /> : null}
-            </>
+          {user && conferences ? (
+            <Conferences conferences={conferences} />
           ) : (
             <div></div>
           )}
@@ -51,34 +53,39 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
   if (cookie && CAV_ACC) {
     try {
-      axiosInstance.defaults.headers.cookie = cookie;
-      axiosInstance.defaults.baseURL = 'http://backend:3001/api';
+      setAxiosDefaultForServerSide(cookie);
       const { headers, data: token } = await getNewTokenAPI();
 
       if (headers['set-cookie']) {
         res.setHeader('set-cookie', headers['set-cookie']);
-        axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
-        await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
+        setAxiosDefaultHeaderCookie(
+          `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
+        );
+        // axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
+        await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
           staleTime: 900,
         });
 
-        await queryClient.prefetchQuery(
-          [QUERYKEY_CONFERENCE],
-          () => getConference(),
-          {
-            staleTime: 900,
-          },
-        );
+        await queryClient.prefetchQuery([QUERYKEY_CONFERENCE], getConference, {
+          staleTime: 900,
+        });
       }
     } catch (e) {
     } finally {
-      axiosInstance.defaults.headers.cookie = '';
+      setAxiosDefaultHeaderCookie('');
     }
+    return {
+      props: { dehydratedState: dehydrate(queryClient) },
+    };
+  } else {
+    return {
+      props: { dehydratedState: dehydrate(queryClient) },
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+    };
   }
-
-  return {
-    props: { dehydratedState: dehydrate(queryClient) },
-  };
 };
 
 export default Home;
