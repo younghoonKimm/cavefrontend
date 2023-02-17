@@ -1,15 +1,18 @@
 import { getNewTokenAPI } from '@/api/auth/auth';
+import axiosInstance from '@/api/axios';
 import Layout from '@/components/templates/Layout/Layout';
 import useAuth, { getMe } from '@/hooks/api/useAuth';
 import useSocket from '@/hooks/useSocket';
 import {
   setAxiosDefaultForServerSide,
   setAxiosDefaultHeaderCookie,
+  withAuth,
 } from '@/utils/getServerSide';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
+
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -17,8 +20,8 @@ const ConferenceDetail: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const { user } = useAuth();
-  const [socket, disconnect] = useSocket(id as string);
   const [mes, setMes] = useState<any>('');
+  const [socket, disconnect] = useSocket(id as string);
 
   useEffect(() => {
     if (user && socket) {
@@ -40,11 +43,12 @@ const ConferenceDetail: NextPage = () => {
       socket.on('messaged', (data) => {
         setMes(data);
       });
+
       return () => {
         socket.off('messaged', (data) => setMes(data));
       };
     }
-  }, [socket, user, mes]);
+  }, [socket, user]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
@@ -71,48 +75,16 @@ const ConferenceDetail: NextPage = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  res,
-  params,
-}) => {
+export const getServerSideProps: GetServerSideProps = withAuth(async () => {
   const queryClient = new QueryClient();
-  const { CAV_ACC } = req.cookies;
-  const { cookie } = req.headers;
 
-  const id = params?.id as string;
-
-  if (cookie && CAV_ACC) {
-    try {
-      setAxiosDefaultForServerSide(cookie);
-      const { headers, data: token } = await getNewTokenAPI();
-
-      if (headers['set-cookie']) {
-        res.setHeader('set-cookie', headers['set-cookie']);
-        setAxiosDefaultHeaderCookie(
-          `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
-        );
-        await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
-          staleTime: 900,
-        });
-      }
-    } catch (e) {
-    } finally {
-      setAxiosDefaultHeaderCookie('');
-    }
-  } else {
-    return {
-      props: { dehydratedState: dehydrate(queryClient) },
-      redirect: {
-        permanent: false,
-        destination: '/login',
-      },
-    };
-  }
+  await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
+    staleTime: 900,
+  });
 
   return {
     props: { dehydratedState: dehydrate(queryClient) },
   };
-};
+});
 
 export default ConferenceDetail;

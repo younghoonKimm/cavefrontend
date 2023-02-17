@@ -6,18 +6,12 @@ import useAuth, { getMe } from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
-import { Suspense, useEffect } from 'react';
-import useSocket from '@/hooks/useSocket';
-import Layout from '@/components/templates/Layout/Layout';
 
-import axiosInstance from '@/api/axios';
+import Layout from '@/components/templates/Layout/Layout';
 
 import { getConference, useGetConference } from '@/hooks/api/useConference';
 import Conferences from '@/components/organisms/Conferences/Conferences';
-import {
-  setAxiosDefaultForServerSide,
-  setAxiosDefaultHeaderCookie,
-} from '@/utils/getServerSide';
+import { withAuth } from '@/utils/getServerSide';
 
 const Home: NextPage = () => {
   const { user } = useAuth();
@@ -46,46 +40,20 @@ const Home: NextPage = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
+export const getServerSideProps: GetServerSideProps = withAuth(async () => {
   const queryClient = new QueryClient();
-  const { CAV_ACC } = req.cookies;
-  const { cookie } = req.headers;
 
-  if (cookie && CAV_ACC) {
-    try {
-      setAxiosDefaultForServerSide(cookie);
-      const { headers, data: token } = await getNewTokenAPI();
+  await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
+    staleTime: 900,
+  });
 
-      if (headers['set-cookie']) {
-        res.setHeader('set-cookie', headers['set-cookie']);
-        setAxiosDefaultHeaderCookie(
-          `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
-        );
-        // axiosInstance.defaults.headers.cookie = `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`;
-        await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
-          staleTime: 900,
-        });
+  await queryClient.prefetchQuery([QUERYKEY_CONFERENCE], getConference, {
+    staleTime: 900,
+  });
 
-        await queryClient.prefetchQuery([QUERYKEY_CONFERENCE], getConference, {
-          staleTime: 900,
-        });
-      }
-    } catch (e) {
-    } finally {
-      setAxiosDefaultHeaderCookie('');
-    }
-    return {
-      props: { dehydratedState: dehydrate(queryClient) },
-    };
-  } else {
-    return {
-      props: { dehydratedState: dehydrate(queryClient) },
-      redirect: {
-        permanent: false,
-        destination: '/login',
-      },
-    };
-  }
-};
+  return {
+    props: { dehydratedState: dehydrate(queryClient) },
+  };
+});
 
 export default Home;

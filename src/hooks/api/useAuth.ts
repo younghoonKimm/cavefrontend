@@ -13,6 +13,7 @@ interface UseAuthReturnType {
 
 export async function getMe(): Promise<IUser> {
   const res = await getProfileAPI();
+
   const { data } = res;
 
   return data?.user;

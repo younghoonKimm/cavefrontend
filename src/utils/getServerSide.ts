@@ -1,6 +1,6 @@
 import { getNewTokenAPI } from '@/api/auth/auth';
 import axiosInstance from '@/api/axios';
-import { DehydratedState } from '@tanstack/react-query';
+import { dehydrate, DehydratedState, QueryClient } from '@tanstack/react-query';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 
 export const setAxiosDefaultHeaderCookie = (cookie: string) => {
@@ -16,10 +16,11 @@ export function withAuth(
   gssp: () => Promise<{ props: { dehydratedState: DehydratedState } }>,
 ) {
   return async (context: GetServerSidePropsContext) => {
-    const { req, res, params } = context;
+    const { req, res } = context;
     const { CAV_ACC, CAV_RFS } = req.cookies;
     const { cookie } = req.headers;
 
+    let gsspData;
     if (cookie && CAV_ACC && CAV_RFS) {
       try {
         setAxiosDefaultForServerSide(cookie);
@@ -31,13 +32,8 @@ export function withAuth(
             `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
           );
         }
+        gsspData = await gssp();
       } catch (e) {
-        return {
-          redirect: {
-            permanent: false,
-            destination: '/login',
-          },
-        };
       } finally {
         setAxiosDefaultHeaderCookie('');
       }
@@ -50,12 +46,10 @@ export function withAuth(
       };
     }
 
-    // const gsspData = await gssp();
-
-    // return {
-    //   props: {
-    //     ...gsspData.props,
-    //   },
-    // };
+    return {
+      props: {
+        ...gsspData,
+      },
+    };
   };
 }

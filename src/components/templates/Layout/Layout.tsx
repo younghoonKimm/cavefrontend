@@ -7,12 +7,12 @@ import { modalAtoms } from '@/states/common';
 import Modal from '@/components/atoms/Modal/Modal';
 import useModal from '@/hooks/useModal';
 import dynamic from 'next/dynamic';
-import Nav from './Nav';
 // import Nav from './Nav';
 
 interface LayoutProps extends Comp {
   isNav?: boolean;
 }
+const Nav = dynamic(() => import('./Nav'), { ssr: false });
 
 function Layout({ children, isNav = false }: LayoutProps) {
   const [showComponent, setShowComponent] = useState(false);
