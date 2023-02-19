@@ -1,7 +1,7 @@
 import { getNewTokenAPI } from '@/api/auth/auth';
 import axiosInstance from '@/api/axios';
-import { dehydrate, DehydratedState, QueryClient } from '@tanstack/react-query';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { DehydratedState } from '@tanstack/react-query';
+import { GetServerSidePropsContext } from 'next';
 
 export const setAxiosDefaultHeaderCookie = (cookie: string) => {
   axiosInstance.defaults.headers.cookie = cookie;
@@ -21,6 +21,7 @@ export function withAuth(
     const { cookie } = req.headers;
 
     let gsspData;
+
     if (cookie && CAV_ACC && CAV_RFS) {
       try {
         setAxiosDefaultForServerSide(cookie);
@@ -34,6 +35,12 @@ export function withAuth(
         }
         gsspData = await gssp();
       } catch (e) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: '/login',
+          },
+        };
       } finally {
         setAxiosDefaultHeaderCookie('');
       }
