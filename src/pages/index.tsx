@@ -1,7 +1,6 @@
 import Head from 'next/head';
 
 import { GetServerSideProps, NextPage } from 'next';
-import { getNewTokenAPI } from '@/api/auth/auth';
 import useAuth, { getMe } from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -16,7 +15,6 @@ import { withAuth } from '@/utils/getServerSide';
 const Home: NextPage = () => {
   const { user } = useAuth();
 
-  // const [socket, disconnect] = useSocket(user?.id);
   const { conferences } = useGetConference(user);
 
   return (

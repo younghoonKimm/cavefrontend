@@ -14,6 +14,7 @@ export const setAxiosDefaultForServerSide = (cookie: string) => {
 
 export function withAuth(
   gssp: () => Promise<{ props: { dehydratedState: DehydratedState } }>,
+  isHome?: boolean,
 ) {
   return async (context: GetServerSidePropsContext) => {
     const { req, res } = context;
@@ -27,30 +28,25 @@ export function withAuth(
         setAxiosDefaultForServerSide(cookie);
         const { headers, data: token } = await getNewTokenAPI();
 
-        if (headers['set-cookie']) {
+        if (headers['set-cookie'] && token) {
           res.setHeader('set-cookie', headers['set-cookie']);
           setAxiosDefaultHeaderCookie(
             `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
           );
+
+          gsspData = await gssp();
+        } else {
+          throw new Error();
         }
-        gsspData = await gssp();
-      } catch (e) {
-        return {
-          redirect: {
-            permanent: false,
-            destination: '/login',
-          },
-        };
+      } catch (error) {
+        res.setHeader('set-cookie', [
+          `CAV_ACC=""; Max-Age=0`,
+          `CAV_RFS=""; Max-Age=0`,
+        ]);
       } finally {
         setAxiosDefaultHeaderCookie('');
       }
     } else {
-      return {
-        redirect: {
-          permanent: false,
-          destination: '/login',
-        },
-      };
     }
 
     return {

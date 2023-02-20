@@ -8,9 +8,9 @@ function CreateConfrenceModal() {
   const createConference = useCreateConference();
 
   const [conferenceData, setConferenceData] = useState<any>({
-    title: '테ㅡ트',
+    title: '테스트용',
     status: 'P',
-    agenda: 'ㅇㄴㅇㄴ',
+    agendas: [{ title: 'sddssd', text: 'dssddssd' }],
     users: [],
   });
 
@@ -19,7 +19,7 @@ function CreateConfrenceModal() {
       setConferenceData({
         title: '테ㅡ트',
         status: 'P',
-        agenda: 'ㅇㄴㅇㄴ',
+        agendas: [{ title: 'sddssd', text: 'dssddssd' }],
         users: [user.id],
       });
     }

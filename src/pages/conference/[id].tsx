@@ -1,13 +1,7 @@
-import { getNewTokenAPI } from '@/api/auth/auth';
-import axiosInstance from '@/api/axios';
 import Layout from '@/components/templates/Layout/Layout';
 import useAuth, { getMe } from '@/hooks/api/useAuth';
 import useSocket from '@/hooks/useSocket';
-import {
-  setAxiosDefaultForServerSide,
-  setAxiosDefaultHeaderCookie,
-  withAuth,
-} from '@/utils/getServerSide';
+import { withAuth } from '@/utils/getServerSide';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { QUERYKEY_USER } from 'constants/queryKeys';
 import { GetServerSideProps, NextPage } from 'next';
