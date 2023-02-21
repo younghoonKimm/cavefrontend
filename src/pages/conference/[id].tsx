@@ -1,52 +1,22 @@
-import Layout from '@/components/templates/Layout/Layout';
-import useAuth, { getMe } from '@/hooks/api/useAuth';
-import useSocket from '@/hooks/useSocket';
-import { withAuth } from '@/utils/getServerSide';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
-import { QUERYKEY_USER } from 'constants/queryKeys';
-import { GetServerSideProps, NextPage } from 'next';
-import Head from 'next/head';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 
+import Head from 'next/head';
+import useAuth, { getMe } from '@/hooks/api/useAuth';
+import { withAuth } from '@/utils/getServerSide';
+import {
+  QUERYKEY_CONFERENCE,
+  QUERYKEY_CONFERENCES,
+  QUERYKEY_USER,
+} from 'constants/queryKeys';
+
+import ConferenceTemplate from '@/components/templates/ConferenceTemplate/ConferenceTemplate';
+import { getConference } from '@/hooks/api/useConference';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
 
 const ConferenceDetail: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { user } = useAuth();
-  const [mes, setMes] = useState<any>('');
-  const [socket, disconnect] = useSocket(id as string);
-
-  useEffect(() => {
-    if (user && socket) {
-      socket.emit('login', {
-        id: user?.id,
-        conferences: [id],
-      });
-    }
-  }, [socket, user, id]);
-
-  useEffect(() => {
-    return () => {
-      disconnect();
-    };
-  }, [disconnect]);
-
-  useEffect(() => {
-    if (user && socket) {
-      socket.on('messaged', (data) => {
-        setMes(data);
-      });
-
-      return () => {
-        socket.off('messaged', (data) => setMes(data));
-      };
-    }
-  }, [socket, user]);
-
-  const onSubmit = useCallback(() => {
-    socket?.emit('message', mes);
-  }, [socket, mes]);
 
   return (
     <>
@@ -56,29 +26,39 @@ const ConferenceDetail: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
-        <div>
-          <button type="button" onClick={() => onSubmit()}>
-            <span>button</span>
-          </button>
 
-          <textarea value={mes} onChange={(e) => setMes(e.target.value)} />
-        </div>
-      </Layout>
+      <ConferenceTemplate />
     </>
   );
 };
 
-export const getServerSideProps: GetServerSideProps = withAuth(async () => {
-  const queryClient = new QueryClient();
+export const getServerSideProps: GetServerSideProps = withAuth(
+  async (context?: GetServerSidePropsContext) => {
+    const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery([QUERYKEY_USER], () => getMe(), {
-    staleTime: 900,
-  });
+    await queryClient.prefetchQuery([QUERYKEY_USER], getMe, {
+      staleTime: 900,
+    });
 
-  return {
-    props: { dehydratedState: dehydrate(queryClient) },
-  };
-});
+    if (context) {
+      const { params } = context;
+      if (params) {
+        const { id: conferenceId } = params;
+
+        await queryClient.prefetchQuery(
+          [QUERYKEY_CONFERENCE, conferenceId],
+          () => getConference(conferenceId as string),
+          {
+            staleTime: 10000,
+          },
+        );
+      }
+    }
+
+    return {
+      props: { dehydratedState: dehydrate(queryClient) },
+    };
+  },
+);
 
 export default ConferenceDetail;

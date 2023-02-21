@@ -10,3 +10,9 @@ export type ModalAtomType = {
   isModal: boolean;
   modalType: ModalTypes;
 };
+
+export interface SVGProps {
+  width?: number;
+  height?: number;
+  [key: string]: any;
+}

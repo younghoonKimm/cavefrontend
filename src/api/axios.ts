@@ -18,7 +18,7 @@ const resetAuth = () => {
   // }
 };
 
-export const refreshToken = async (error: any) => {
+export const getRefreshToken = async (error: any) => {
   const { config, response } = error;
   const originalRequest = config;
   const { status } = response;
@@ -51,7 +51,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    return refreshToken(error);
+    return getRefreshToken(error);
   },
 );
 

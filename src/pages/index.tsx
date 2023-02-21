@@ -4,18 +4,24 @@ import { GetServerSideProps, NextPage } from 'next';
 import useAuth, { getMe } from '@/hooks/api/useAuth';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
-import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
+import { QUERYKEY_CONFERENCES, QUERYKEY_USER } from 'constants/queryKeys';
 
 import Layout from '@/components/templates/Layout/Layout';
 
-import { getConference, useGetConference } from '@/hooks/api/useConference';
+import { getConferences, useGetConferences } from '@/hooks/api/useConference';
 import Conferences from '@/components/organisms/Conferences/Conferences';
 import { withAuth } from '@/utils/getServerSide';
+import { sockets } from '@/hooks/useSocket';
+import { useEffect } from 'react';
 
 const Home: NextPage = () => {
   const { user } = useAuth();
 
-  const { conferences } = useGetConference(user);
+  const { conferences } = useGetConferences(user);
+
+  useEffect(() => {
+    console.log(sockets);
+  }, []);
 
   return (
     <>
@@ -45,7 +51,7 @@ export const getServerSideProps: GetServerSideProps = withAuth(async () => {
     staleTime: 900,
   });
 
-  await queryClient.prefetchQuery([QUERYKEY_CONFERENCE], getConference, {
+  await queryClient.prefetchQuery([QUERYKEY_CONFERENCES], getConferences, {
     staleTime: 900,
   });
 

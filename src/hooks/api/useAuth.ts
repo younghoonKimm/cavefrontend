@@ -2,7 +2,7 @@ import { getProfileAPI } from '@/api/auth/auth';
 import { IUser } from '@/types/auth';
 import { resetTokens } from '@/utils/getCookies';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
+import { QUERYKEY_CONFERENCES, QUERYKEY_USER } from 'constants/queryKeys';
 import { getAccessToken, getRefreshToken } from '@/utils/getCookies';
 
 interface UseAuthReturnType {
@@ -41,7 +41,7 @@ export default function useAuth(): UseAuthReturnType {
 
     queryClient.setQueryData([QUERYKEY_USER], () => null);
     queryClient.removeQueries([QUERYKEY_USER]);
-    queryClient.removeQueries([QUERYKEY_CONFERENCE]);
+    queryClient.removeQueries([QUERYKEY_CONFERENCES]);
   };
 
   return { user, userLoading, clearUserQuery };
