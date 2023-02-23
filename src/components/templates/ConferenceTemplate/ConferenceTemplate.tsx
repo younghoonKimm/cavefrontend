@@ -3,16 +3,17 @@ import { useCallback, useEffect, useState } from 'react';
 
 import ConferenceForm from '@/components/molecules/Conference/ConferenceForm';
 import useAuth from '@/hooks/api/useAuth';
-import useSocket from '@/hooks/useSocket';
+import useSocket, { sockets } from '@/hooks/useSocket';
 import Layout from '../Layout/Layout';
-import { getConference, useGetConference } from '@/hooks/api/useConference';
-import { getConferenceAPI } from '@/api/conference/conference';
+import { io } from 'socket.io-client';
+import { useGetConference } from '@/hooks/api/useConference';
 
 function ConferenceTemplate() {
   const router = useRouter();
   const { id } = router.query;
 
   const { user } = useAuth();
+
   const [socket, disconnect] = useSocket(id as string);
   const [mes, setMes] = useState<string>('');
 
@@ -22,9 +23,16 @@ function ConferenceTemplate() {
     if (!user) router.replace('/');
   }, [user, router]);
 
+  // useEffect(() => {
+  //   return () => {
+  //     disconnect();
+  //   };
+  // }, [disconnect, id]);
+
   useEffect(() => {
     if (user && socket) {
       socket.on('messaged', (data) => {
+        console.log(data);
         setMes(data);
       });
 
@@ -39,7 +47,9 @@ function ConferenceTemplate() {
     }
   }, [socket, user]);
 
-  const onSubmit = useCallback(async () => {
+  console.log(socket);
+
+  const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
   }, [socket, mes]);
 

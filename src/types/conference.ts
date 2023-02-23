@@ -4,9 +4,14 @@ export enum ConferenceStatus {
   Done = 'D',
 }
 
+export interface IAgneda {
+  title: string;
+  text: string;
+}
+
 export interface IConference {
   id: string;
   title: string;
   status: ConferenceStatus;
-  agenda: string;
+  agendas: IAgneda[];
 }

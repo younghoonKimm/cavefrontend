@@ -2,22 +2,14 @@ import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 
 import Head from 'next/head';
-import useAuth, { getMe } from '@/hooks/api/useAuth';
+import { getMe } from '@/hooks/api/useAuth';
 import { withAuth } from '@/utils/getServerSide';
-import {
-  QUERYKEY_CONFERENCE,
-  QUERYKEY_CONFERENCES,
-  QUERYKEY_USER,
-} from 'constants/queryKeys';
+import { QUERYKEY_CONFERENCE, QUERYKEY_USER } from 'constants/queryKeys';
 
 import ConferenceTemplate from '@/components/templates/ConferenceTemplate/ConferenceTemplate';
 import { getConference } from '@/hooks/api/useConference';
-import { useRouter } from 'next/router';
 
 const ConferenceDetail: NextPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
-
   return (
     <>
       <Head>

@@ -7,10 +7,11 @@ interface ConferenceFormProps {
 }
 
 function ConferenceForm({ text, setText }: ConferenceFormProps) {
+  //
   return (
-    <form>
+    <div>
       <Textarea value={text} onChange={(e: any) => setText(e.target.value)} />
-    </form>
+    </div>
   );
 }
 
