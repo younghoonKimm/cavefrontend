@@ -7,6 +7,7 @@ import useSocket, { sockets } from '@/hooks/useSocket';
 import Layout from '../Layout/Layout';
 import { io } from 'socket.io-client';
 import { useGetConference } from '@/hooks/api/useConference';
+import { usePatchAgneda } from '@/hooks/api/useAgenda';
 
 function ConferenceTemplate() {
   const router = useRouter();
@@ -18,40 +19,56 @@ function ConferenceTemplate() {
   const [mes, setMes] = useState<string>('');
 
   const { conference } = useGetConference(id as string, user);
+  const { pathAgenda } = usePatchAgneda();
 
   useEffect(() => {
-    if (!user) router.replace('/');
-  }, [user, router]);
+    if (!user) {
+      router.replace('/');
+    }
+  }, [user]);
 
   // useEffect(() => {
   //   return () => {
   //     disconnect();
   //   };
-  // }, [disconnect, id]);
+  // }, [id]);
 
   useEffect(() => {
     if (user && socket) {
+      console.log('?');
+      socket.emit('login', id);
+
+      socket.once('offer', (data) => {
+        console.log(data);
+      });
+
       socket.on('messaged', (data) => {
         console.log(data);
-        setMes(data);
+        // setMes(data);
       });
 
-      socket.on('offer', (data) => {
-        console.log(data);
-      });
+      // socket.on('someEve', (data) => console.log(data));
 
       return () => {
-        socket?.off('messaged', () => setMes(''));
-        socket?.off('offer', () => setMes(''));
+        socket.off('messaged', (data) => {
+          console.log(data);
+          // setMes(data);
+        });
+        socket?.off('offer', (data) => {
+          console.log(data);
+        });
       };
     }
   }, [socket, user]);
 
-  console.log(socket);
-
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
   }, [socket, mes]);
+
+  const onPatchAgenda = useCallback(
+    () => pathAgenda('3b31c8c8-b7f2-4a57-b907-480509dd0098'),
+    [socket],
+  );
 
   return (
     <Layout>
@@ -60,6 +77,9 @@ function ConferenceTemplate() {
           <div>
             <button type="button" onClick={() => onSubmit()}>
               <span>button</span>
+            </button>
+            <button onClick={onPatchAgenda}>
+              <span>onPath</span>
             </button>
             <ConferenceForm text={mes} setText={setMes} />
           </div>
