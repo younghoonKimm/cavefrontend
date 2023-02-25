@@ -15,7 +15,6 @@ function Conference({ conference }: ConferenceProps) {
   const { id, title, status, users } = conference;
   const { deleteConferenceMutate } = useDeleteConference();
 
-  console.log(conference);
   return (
     <StyledConferenceContainer>
       <StyledRouterButton onClick={() => router.push(`conference/${id}`)}>

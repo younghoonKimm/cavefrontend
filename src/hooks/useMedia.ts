@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
 const pc_config = {
@@ -15,57 +15,102 @@ const pc_config = {
 };
 
 export default function useMedia(socket: Socket | undefined) {
-  const [newConnection, setNewConnection] = useState<any>();
+  const newConnectionRef = useRef<RTCPeerConnection>();
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const pc = new RTCPeerConnection();
-    setNewConnection(new RTCPeerConnection(pc_config));
-    // Rest of your logic here
+    newConnectionRef.current = new RTCPeerConnection(pc_config);
+
+    return () => {
+      if (newConnectionRef.current) {
+        console.log('close');
+        newConnectionRef.current.close();
+      }
+    };
   }, []);
 
-  const onJoined = () => {
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: true,
-      })
-      .then((stream) => {
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-
-        // 자신의 video, audio track을 모두 자신의 RTCPeerConnection에 등록한다.
-        stream.getTracks().forEach((track) => {
-          newConnection.addTrack(track, stream);
+  const onJoined = useCallback(async () => {
+    try {
+      if (newConnectionRef.current) {
+        const sdp = await newConnectionRef.current?.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true,
         });
-        newConnection.onicecandidate = (e) => {
-          if (e.candidate) {
-            socket?.emit('candidate', e.candidate);
-          }
-        };
-        newConnection.oniceconnectionstatechange = (e) => {
-          console.log(e);
-        };
 
-        // newConnection.ontrack = (ev) => {
-        //   console.log('add remotetrack success');
-        //   if (remoteVideoRef.current)
-        //     remoteVideoRef.current.srcObject = ev.streams[0];
-        // };
+        await newConnectionRef.current?.setLocalDescription(
+          new RTCSessionDescription(sdp),
+        );
 
-        // 자신의 video, audio track을 모두 자신의 RTCPeerConnection에 등록한 후에 room에 접속했다고 Signaling Server에 알린다.
-        // 왜냐하면 offer or answer을 주고받을 때의 RTCSessionDescription에 해당 video, audio track에 대한 정보가 담겨 있기 때문에
-        // 순서를 어기면 상대방의 MediaStream을 받을 수 없음
-        // socket.emit('login', {
-        //   room: '1234',
-        //   email: 'sample@naver.com',
-        // });
-      })
-      .catch((error) => {
-        console.log(`getUserMedia error: ${error}`);
-      });
-  };
+        console.log(sdp);
 
-  return { newConnection, onJoined, localVideoRef };
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+
+        if (stream) {
+          if (!newConnectionRef.current) return;
+          if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+          // 자신의 video, audio track을 모두 자신의 RTCPeerConnection에 등록한다.
+          stream
+            .getTracks()
+            .forEach((track) =>
+              newConnectionRef.current?.addTrack(track, stream),
+            );
+
+          newConnectionRef.current.onicecandidate = (e) => {
+            if (e.candidate) {
+              socket?.emit('candidate', e.candidate);
+            }
+          };
+
+          newConnectionRef.current.oniceconnectionstatechange = (e) => {
+            console.log(e);
+          };
+        }
+      }
+
+      /* use the stream */
+    } catch (err) {
+      /* handle the error */
+    }
+
+    // navigator.mediaDevices
+    //   .getUserMedia({
+    //     video: true,
+    //     audio: true,
+    //   })
+    //   .then((stream) => {
+    //     if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+
+    //     // 자신의 video, audio track을 모두 자신의 RTCPeerConnection에 등록한다.
+    //     stream.getTracks().forEach((track) => {
+    //       newConnection.addTrack(track, stream);
+    //     });
+
+    //     newConnection.onicecandidate = (e) => {
+    //       if (e.candidate) {
+    //         socket?.emit('candidate', e.candidate);
+    //       }
+    //     };
+    //     newConnection.oniceconnectionstatechange = (e) => {
+    //       console.log(e);
+    //     };
+
+    //     // newConnection.ontrack = (ev) => {
+    //     //   console.log('add remotetrack success');
+    //     //   if (remoteVideoRef.current)
+    //     //     remoteVideoRef.current.srcObject = ev.streams[0];
+    //     // };
+    //   })
+    //   .then(() => fn())
+    //   .catch((error) => {
+    //     console.log(`getUserMedia error: ${error}`);
+    //   });
+  }, [newConnectionRef, socket]);
+
+  return { newConnectionRef, onJoined, localVideoRef };
 }

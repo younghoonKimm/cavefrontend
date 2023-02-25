@@ -25,7 +25,7 @@ function ConferenceTemplate() {
   const { conference } = useGetConference(id as string, user);
   const { pathAgenda } = usePatchAgneda();
 
-  const { newConnection, onJoined, localVideoRef } = useMedia(socket);
+  const { newConnectionRef, onJoined, localVideoRef } = useMedia(socket);
 
   const isConnected = socket && user;
 
@@ -43,18 +43,18 @@ function ConferenceTemplate() {
   //   };
   // }, [id]);
 
-  useEffect(() => {
-    if (user && socket && isJoin) {
-      socket.emit('login', user);
-      socket.on('offer', (users) => addJoinedUsers(users));
-      socket.on('messaged', (data) => setMes(data));
+  // useEffect(() => {
+  //   if (user && socket && isJoin) {
+  //     socket.emit('login', user);
+  //     socket.on('joined', (users) => addJoinedUsers(users));
+  //     socket.on('messaged', (data) => setMes(data));
 
-      return () => {
-        socket.off('messaged', (data) => setMes(data));
-        socket.off('offer', (users) => addJoinedUsers(users));
-      };
-    }
-  }, [socket, user, isJoin]);
+  //     return () => {
+  //       socket.off('messaged', (data) => setMes(data));
+  //       socket.off('offer', (users) => addJoinedUsers(users));
+  //     };
+  //   }
+  // }, [socket, user, isJoin, newConnectionRef]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
@@ -64,6 +64,8 @@ function ConferenceTemplate() {
     () => pathAgenda('bfcd87ca-2846-4971-aed5-6bb2507de172'),
     [socket],
   );
+
+  const onJoinedRoom = () => setisJoin(true);
 
   return (
     <Layout>
@@ -85,7 +87,6 @@ function ConferenceTemplate() {
                     .map((joinUser: any) => (
                       <div key={joinUser.id}>{joinUser.name}</div>
                     ))}
-
                   <div>
                     <video
                       style={{
@@ -93,6 +94,7 @@ function ConferenceTemplate() {
                         height: 240,
                         margin: 5,
                         backgroundColor: 'black',
+                        objectFit: 'cover',
                       }}
                       muted
                       ref={localVideoRef}
@@ -115,7 +117,13 @@ function ConferenceTemplate() {
             </>
           ) : (
             <div>
-              <button type="button" onClick={() => setisJoin(true)}>
+              <button
+                type="button"
+                onClick={() => {
+                  onJoined();
+                  setisJoin(true);
+                }}
+              >
                 입장하기
               </button>
             </div>
