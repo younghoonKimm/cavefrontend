@@ -4,6 +4,7 @@ import { flexStyle } from '@/styles/common';
 import { IConference } from '@/types/conference';
 import { useRouter } from 'next/router';
 import { useDeleteConference } from '@/hooks/api/useConference';
+import ProfileImage from '../Images/ProfileImage/ProfileImage';
 
 interface ConferenceProps {
   conference: IConference;
@@ -11,14 +12,27 @@ interface ConferenceProps {
 
 function Conference({ conference }: ConferenceProps) {
   const router = useRouter();
-  const { id, title, status } = conference;
+  const { id, title, status, users } = conference;
   const { deleteConferenceMutate } = useDeleteConference();
+
+  console.log(conference);
   return (
     <StyledConferenceContainer>
       <StyledRouterButton onClick={() => router.push(`conference/${id}`)}>
         <span>{status}</span>
         <p>{title}</p>
       </StyledRouterButton>
+      {users?.map((user) =>
+        user.profileImg && user.name ? (
+          <ProfileImage
+            width={32}
+            height={32}
+            src={user.profileImg}
+            key={user.profileImg}
+            alt={`${user.name} 이미지`}
+          />
+        ) : null,
+      )}
 
       <button onClick={() => deleteConferenceMutate(id)}>삭제</button>
     </StyledConferenceContainer>

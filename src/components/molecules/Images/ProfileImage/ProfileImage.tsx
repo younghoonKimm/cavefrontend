@@ -4,21 +4,27 @@ import styled from 'styled-components';
 
 interface ProfileImageProps {
   src: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  alt?: string;
 }
 
-function ProfileImage({ src, width, height }: ProfileImageProps) {
+function ProfileImage({
+  src,
+  width = 52,
+  height = 52,
+  alt = 'profileImg',
+}: ProfileImageProps) {
   return (
-    <StyledProfileImg>
-      <Image src={src} alt="image" width={width} height={height} />
+    <StyledProfileImg width={width} height={height}>
+      <Image src={src} width={width} height={height} alt={alt} />
     </StyledProfileImg>
   );
 }
 
-const StyledProfileImg = styled.div`
-  width: 52px;
-  height: 52px;
+const StyledProfileImg = styled.div<{ width: number; height: number }>`
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.height}px;
   border-radius: 50%;
   overflow: hidden;
   img {

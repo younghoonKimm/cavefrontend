@@ -1,13 +1,15 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import ConferenceForm from '@/components/molecules/Conference/ConferenceForm';
 import useAuth from '@/hooks/api/useAuth';
-import useSocket, { sockets } from '@/hooks/useSocket';
+import useSocket from '@/hooks/useSocket';
 import Layout from '../Layout/Layout';
-import { io } from 'socket.io-client';
+
 import { useGetConference } from '@/hooks/api/useConference';
 import { usePatchAgneda } from '@/hooks/api/useAgenda';
+import { PartialUserType, User } from '@/types/auth';
+import useMedia from '@/hooks/useMedia';
 
 function ConferenceTemplate() {
   const router = useRouter();
@@ -16,10 +18,18 @@ function ConferenceTemplate() {
   const { user } = useAuth();
 
   const [socket, disconnect] = useSocket(id as string);
+  const [isJoin, setisJoin] = useState<boolean>(false);
+  const [joinedUsers, setJoinedUsers] = useState<PartialUserType[]>([]);
   const [mes, setMes] = useState<string>('');
 
   const { conference } = useGetConference(id as string, user);
   const { pathAgenda } = usePatchAgneda();
+
+  const { newConnection, onJoined, localVideoRef } = useMedia(socket);
+
+  const isConnected = socket && user;
+
+  const addJoinedUsers = (users: PartialUserType[]) => setJoinedUsers(users);
 
   useEffect(() => {
     if (!user) {
@@ -34,56 +44,83 @@ function ConferenceTemplate() {
   // }, [id]);
 
   useEffect(() => {
-    if (user && socket) {
-      console.log('?');
-      socket.emit('login', id);
-
-      socket.once('offer', (data) => {
-        console.log(data);
-      });
-
-      socket.on('messaged', (data) => {
-        console.log(data);
-        // setMes(data);
-      });
-
-      // socket.on('someEve', (data) => console.log(data));
+    if (user && socket && isJoin) {
+      socket.emit('login', user);
+      socket.on('offer', (users) => addJoinedUsers(users));
+      socket.on('messaged', (data) => setMes(data));
 
       return () => {
-        socket.off('messaged', (data) => {
-          console.log(data);
-          // setMes(data);
-        });
-        socket?.off('offer', (data) => {
-          console.log(data);
-        });
+        socket.off('messaged', (data) => setMes(data));
+        socket.off('offer', (users) => addJoinedUsers(users));
       };
     }
-  }, [socket, user]);
+  }, [socket, user, isJoin]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
   }, [socket, mes]);
 
   const onPatchAgenda = useCallback(
-    () => pathAgenda('3b31c8c8-b7f2-4a57-b907-480509dd0098'),
+    () => pathAgenda('bfcd87ca-2846-4971-aed5-6bb2507de172'),
     [socket],
   );
 
   return (
     <Layout>
       <>
-        {socket && user && (
-          <div>
-            <button type="button" onClick={() => onSubmit()}>
-              <span>button</span>
-            </button>
-            <button onClick={onPatchAgenda}>
-              <span>onPath</span>
-            </button>
-            <ConferenceForm text={mes} setText={setMes} />
-          </div>
-        )}
+        <div>
+          {isJoin ? (
+            <>
+              {isConnected && (
+                <div>
+                  <button type="button" onClick={() => onSubmit()}>
+                    <span>button</span>
+                  </button>
+                  <button onClick={onPatchAgenda}>
+                    <span>onPath</span>
+                  </button>
+                  <ConferenceForm text={mes} setText={setMes} />
+                  {Object.values(joinedUsers)
+                    ?.filter((joinedUser: any) => user.id !== joinedUser.id)
+                    .map((joinUser: any) => (
+                      <div key={joinUser.id}>{joinUser.name}</div>
+                    ))}
+
+                  <div>
+                    <video
+                      style={{
+                        width: 240,
+                        height: 240,
+                        margin: 5,
+                        backgroundColor: 'black',
+                      }}
+                      muted
+                      ref={localVideoRef}
+                      autoPlay
+                    ></video>
+                    {/* <video
+                      id="remotevideo"
+                      style={{
+                        width: 240,
+                        height: 240,
+                        margin: 5,
+                        backgroundColor: 'black',
+                      }}
+                      ref={remoteVideoRef}
+                      autoPlay
+                    ></video> */}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div>
+              <button type="button" onClick={() => setisJoin(true)}>
+                입장하기
+              </button>
+            </div>
+          )}
+        </div>
       </>
     </Layout>
   );

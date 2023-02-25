@@ -1,3 +1,5 @@
+import { User } from './auth';
+
 export enum ConferenceStatus {
   Reserve = 'R',
   Proceed = 'P',
@@ -14,4 +16,5 @@ export interface IConference {
   title: string;
   status: ConferenceStatus;
   agendas: IAgneda[];
+  users: Pick<User, 'name' | 'profileImg'>[];
 }
