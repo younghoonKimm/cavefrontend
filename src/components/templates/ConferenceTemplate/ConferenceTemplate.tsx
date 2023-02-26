@@ -10,6 +10,7 @@ import { useGetConference } from '@/hooks/api/useConference';
 import { usePatchAgneda } from '@/hooks/api/useAgenda';
 import { PartialUserType, User } from '@/types/auth';
 import useMedia from '@/hooks/useMedia';
+import Video from '@/components/atoms/Video/Video';
 
 function ConferenceTemplate() {
   const router = useRouter();
@@ -71,6 +72,9 @@ function ConferenceTemplate() {
     <Layout>
       <>
         <div>
+          <div>
+            <Video ref={localVideoRef} autoPlay />
+          </div>
           {isJoin ? (
             <>
               {isConnected && (
@@ -88,18 +92,6 @@ function ConferenceTemplate() {
                       <div key={joinUser.id}>{joinUser.name}</div>
                     ))}
                   <div>
-                    <video
-                      style={{
-                        width: 240,
-                        height: 240,
-                        margin: 5,
-                        backgroundColor: 'black',
-                        objectFit: 'cover',
-                      }}
-                      muted
-                      ref={localVideoRef}
-                      autoPlay
-                    ></video>
                     {/* <video
                       id="remotevideo"
                       style={{
@@ -121,9 +113,12 @@ function ConferenceTemplate() {
                 type="button"
                 onClick={() => {
                   onJoined();
-                  setisJoin(true);
+                  // setisJoin(true);
                 }}
               >
+                연결하기
+              </button>
+              <button type="button" onClick={onJoinedRoom}>
                 입장하기
               </button>
             </div>
