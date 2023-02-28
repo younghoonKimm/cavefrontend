@@ -13,7 +13,7 @@ const CustomVideo = styled.video`
   width: 240px;
   height: 240px;
   object-fit: cover;
-  background: ${(props) => props.theme.bgColor};
+  background: ${(props) => props.theme.darkTheme.bgColor};
 `;
 
 Video.displayName = 'Video';

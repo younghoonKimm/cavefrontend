@@ -7,4 +7,4 @@ export interface User {
 
 export type IUser = User | null;
 
-export type PartialUser = Partial<User>;
+export type PartialUserType = Partial<User>;
