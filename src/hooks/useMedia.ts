@@ -10,7 +10,13 @@ const pc_config = {
     //   'username': '[USERNAME]'
     // },
     {
-      urls: 'stun:stun.l.google.com:19302',
+      urls: [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+        'stun:stun3.l.google.com:19302',
+        'stun:stun4.l.google.com:19302',
+      ],
     },
   ],
 };
@@ -91,9 +97,7 @@ export default function useMedia(socket: Socket | undefined, user) {
         });
 
         //여기가 undefined
-        await newConnectionRef.current.setLocalDescription(
-          new RTCSessionDescription(sdp),
-        );
+        newConnectionRef.current.setLocalDescription(sdp);
 
         socket.emit('offer', sdp);
       }
@@ -147,7 +151,7 @@ export default function useMedia(socket: Socket | undefined, user) {
       if (newConnectionRef.current && socket) {
         console.log('sendsdp', sdp);
 
-        await newConnectionRef.current.setRemoteDescription(
+        newConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(sdp),
         );
 

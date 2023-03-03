@@ -70,7 +70,7 @@ function ConferenceTemplate() {
     if (user && socket && isJoin) {
       // socket?.emit('login', user);
 
-      socket.on('joined', (users) => {
+      socket.once('joined', (users) => {
         if (users) {
           addJoinedUsers(users);
           createOffer();
@@ -85,7 +85,7 @@ function ConferenceTemplate() {
 
       socket.on('getAnswer', (sdp: RTCSessionDescription) => {
         if (!newConnectionRef.current) return;
-        console.log(new RTCSessionDescription(sdp));
+        console.log('ans', sdp);
         newConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(sdp),
         );
