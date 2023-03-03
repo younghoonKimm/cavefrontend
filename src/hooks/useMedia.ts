@@ -20,7 +20,7 @@ interface OfferType {
   audio: boolean;
 }
 
-export default function useMedia(socket: Socket | undefined) {
+export default function useMedia(socket: Socket | undefined, user) {
   const [offerOpt, setOffetOpt] = useState<OfferType>({
     video: true,
     audio: false,
@@ -32,7 +32,28 @@ export default function useMedia(socket: Socket | undefined) {
 
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  // const getLocalStream = useCallback(async () => {
+  //   try {
+  //     const localStream = await navigator.mediaDevices.getUserMedia({
+  //       audio: true,
+  //       video: {
+  //         width: 240,
+  //         height: 240,
+  //       },
+  //     });
+  //     localStreamRef.current = localStream;
+  //     if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
+  //     if (socket) {
+  //       socket?.emit('login', user);
+  //     }
+  //   } catch (e) {
+  //     console.log(`getUserMedia error: ${e}`);
+  //   }
+  // }, []);
+
   useEffect(() => {
+    newConnectionRef.current = new RTCPeerConnection(pc_config);
+
     return () => {
       //   if (newConnectionRef.current) {
       //     console.log('close');
@@ -43,11 +64,11 @@ export default function useMedia(socket: Socket | undefined) {
 
   const getUserStram = async (video: boolean = true, audio: boolean = false) =>
     await navigator.mediaDevices.getUserMedia({
-      video,
-      audio,
+      video: true,
+      audio: true,
     });
 
-  const onVideo = useCallback(async () => {
+  const onVideo = async () => {
     const stream = await getUserStram();
 
     if (stream) {
@@ -58,90 +79,92 @@ export default function useMedia(socket: Socket | undefined) {
         .getTracks()
         .forEach((track) => newConnectionRef.current?.addTrack(track, stream));
     }
-  }, []);
+  };
 
-  const createOffer = async () => {
+  const createOffer = useCallback(async () => {
     try {
       if (newConnectionRef.current && socket) {
+        if (newConnectionRef.current?.remoteDescription) return;
         const sdp = await newConnectionRef.current.createOffer({
-          offerToReceiveAudio: false,
-          offerToReceiveVideo: false,
+          offerToReceiveVideo: true,
+          offerToReceiveAudio: true,
         });
+
+        //여기가 undefined
         await newConnectionRef.current.setLocalDescription(
           new RTCSessionDescription(sdp),
         );
-        console.log(sdp);
+
         socket.emit('offer', sdp);
       }
     } catch (e) {
       console.error(e, 'error');
     }
-  };
+  }, [newConnectionRef, socket]);
 
-  const onJoined = useCallback(async () => {
+  const onJoined = async () => {
     try {
-      if (newConnectionRef.current) {
+      if (!socket) return;
+
+      if (newConnectionRef.current && socket) {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
 
-        if (stream) {
-          if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
 
-          stream
-            .getTracks()
-            .forEach((track) =>
-              newConnectionRef.current?.addTrack(track, stream),
-            );
-        }
+        stream
+          .getTracks()
+          .forEach((track) =>
+            newConnectionRef.current?.addTrack(track, stream),
+          );
 
         newConnectionRef.current.onicecandidate = (e) => {
           if (e.candidate) {
-            console.log(e.candidate);
             socket?.emit('candidate', e.candidate);
           }
         };
 
-        newConnectionRef.current.oniceconnectionstatechange = (e) => {
-          //   console.log(e);
-        };
+        newConnectionRef.current.oniceconnectionstatechange = (e) => {};
 
         newConnectionRef.current.ontrack = (ev) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = ev.streams[0];
           }
         };
+
+        socket?.emit('login', user);
       }
     } catch (err) {
       /* handle the error */
     }
-  }, [onVideo, socket]);
+  };
 
   const createAnswer = async (sdp: RTCSessionDescription) => {
     try {
+      if (!socket) return;
       if (newConnectionRef.current && socket) {
+        console.log('sendsdp', sdp);
+
         await newConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(sdp),
         );
 
-        const mySdp = await newConnectionRef.current.createAnswer({
-          offerToReceiveVideo: true,
-          offerToReceiveAudio: true,
-        });
+        const mySdp = await newConnectionRef.current.createAnswer();
 
-        await newConnectionRef.current.setLocalDescription(
-          new RTCSessionDescription(mySdp),
-        );
+        newConnectionRef.current.setLocalDescription(mySdp);
+
         socket?.emit('answer', mySdp);
       }
     } catch (e) {
-      console.error(e, 'inUse');
+      console.error(e);
     }
   };
 
   return {
     newConnectionRef,
+    remoteVideoRef,
     onJoined,
     localVideoRef,
     onVideo,

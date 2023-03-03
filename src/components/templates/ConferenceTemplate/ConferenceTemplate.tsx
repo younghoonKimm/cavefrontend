@@ -42,12 +42,13 @@ function ConferenceTemplate() {
 
   const {
     newConnectionRef,
+    remoteVideoRef,
     onJoined,
     localVideoRef,
     createOffer,
     onVideo,
     createAnswer,
-  } = useMedia(socket);
+  } = useMedia(socket, user);
 
   const isConnected = socket && user;
 
@@ -66,14 +67,14 @@ function ConferenceTemplate() {
   // }, [id]);
 
   useEffect(() => {
-    newConnectionRef.current = new RTCPeerConnection(pc_config);
-
     if (user && socket && isJoin) {
-      socket.emit('login', user);
+      // socket?.emit('login', user);
 
       socket.on('joined', (users) => {
-        addJoinedUsers(users);
-        createOffer();
+        if (users) {
+          addJoinedUsers(users);
+          createOffer();
+        }
       });
 
       socket.on('messaged', (data) => setMes(data));
@@ -84,11 +85,10 @@ function ConferenceTemplate() {
 
       socket.on('getAnswer', (sdp: RTCSessionDescription) => {
         if (!newConnectionRef.current) return;
-        console.log(sdp);
+        console.log(new RTCSessionDescription(sdp));
         newConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(sdp),
         );
-        //console.log(sdp);
       });
 
       socket.on('getCandidate', async (candidate: RTCIceCandidateInit) => {
@@ -103,7 +103,9 @@ function ConferenceTemplate() {
 
       return () => {
         socket.off('messaged', (data) => setMes(data));
-        socket.off('offer', (users) => addJoinedUsers(users));
+        socket.off('getOffer', (users) => addJoinedUsers(users));
+        socket.off('getAnswer', (users) => addJoinedUsers(users));
+        socket.off('getCandidate', (users) => addJoinedUsers(users));
       };
     }
   }, [socket, user, isJoin, newConnectionRef]);
@@ -124,7 +126,10 @@ function ConferenceTemplate() {
       <>
         <div>
           <div>
-            <Video ref={localVideoRef} autoPlay />
+            <Video ref={localVideoRef} autoPlay muted />
+          </div>
+          <div>
+            <Video ref={remoteVideoRef} autoPlay muted />
           </div>
           {isJoin ? (
             <>
@@ -137,11 +142,9 @@ function ConferenceTemplate() {
                     <span>onPath</span>
                   </button>
                   <ConferenceForm text={mes} setText={setMes} />
-                  {Object.values(joinedUsers)
-                    ?.filter((joinedUser: any) => user.id !== joinedUser.id)
-                    .map((joinUser: any) => (
-                      <div key={joinUser.id}>{joinUser.name}</div>
-                    ))}
+                  {Object.values(joinedUsers).map((joinUser: any) => (
+                    <div key={joinUser.id}>{joinUser.name}</div>
+                  ))}
                   <div>
                     {/* <video
                       id="remotevideo"
@@ -160,7 +163,14 @@ function ConferenceTemplate() {
             </>
           ) : (
             <div>
-              <button type="button">연결하기</button>
+              <button
+                type="button"
+                onClick={() => {
+                  onVideo();
+                }}
+              >
+                연결하기
+              </button>
               <button
                 type="button"
                 onClick={() => {
