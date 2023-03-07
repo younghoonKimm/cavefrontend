@@ -70,6 +70,10 @@ function ConferenceTemplate() {
     if (user && socket && isJoin) {
       // socket?.emit('login', user);
 
+      socket.once('exit', (users) => {
+        console.log(users);
+      });
+
       socket.once('joined', (users) => {
         if (users) {
           addJoinedUsers(users);
