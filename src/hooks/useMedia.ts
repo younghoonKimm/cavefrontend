@@ -31,6 +31,7 @@ export default function useMedia(socket: Socket | undefined, user) {
     video: true,
     audio: false,
   });
+  const [myStream, setMyStream] = useState<any>();
 
   const newConnectionRef = useRef<RTCPeerConnection>();
   const localStreamRef = useRef<MediaStream>(null);
@@ -61,12 +62,32 @@ export default function useMedia(socket: Socket | undefined, user) {
     newConnectionRef.current = new RTCPeerConnection(pc_config);
 
     return () => {
-      //   if (newConnectionRef.current) {
-      //     console.log('close');
-      //     newConnectionRef.current.close();
-      //   }
+      if (newConnectionRef.current) {
+        newConnectionRef.current = undefined;
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (myStream) {
+      if (!newConnectionRef.current) return;
+      if (localVideoRef.current) localVideoRef.current.srcObject = myStream;
+
+      myStream
+        .getTracks()
+        .forEach((track: MediaStreamTrack) =>
+          newConnectionRef.current?.addTrack(track, myStream),
+        );
+
+      return () => {
+        if (myStream) {
+          myStream
+            .getTracks()
+            .forEach((track: MediaStreamTrack) => track.stop());
+        }
+      };
+    }
+  }, [myStream]);
 
   const getUserStram = async (video: boolean = true, audio: boolean = false) =>
     await navigator.mediaDevices.getUserMedia({
@@ -76,15 +97,7 @@ export default function useMedia(socket: Socket | undefined, user) {
 
   const onVideo = async () => {
     const stream = await getUserStram();
-
-    if (stream) {
-      if (!newConnectionRef.current) return;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-
-      stream
-        .getTracks()
-        .forEach((track) => newConnectionRef.current?.addTrack(track, stream));
-    }
+    setMyStream(stream);
   };
 
   const createOffer = useCallback(async () => {
@@ -96,7 +109,6 @@ export default function useMedia(socket: Socket | undefined, user) {
           offerToReceiveAudio: true,
         });
 
-        //여기가 undefined
         newConnectionRef.current.setLocalDescription(sdp);
 
         socket.emit('offer', sdp);
@@ -111,18 +123,7 @@ export default function useMedia(socket: Socket | undefined, user) {
       if (!socket) return;
 
       if (newConnectionRef.current && socket) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
-
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-
-        stream
-          .getTracks()
-          .forEach((track) =>
-            newConnectionRef.current?.addTrack(track, stream),
-          );
+        // await onVideo();
 
         newConnectionRef.current.onicecandidate = (e) => {
           if (e.candidate) {

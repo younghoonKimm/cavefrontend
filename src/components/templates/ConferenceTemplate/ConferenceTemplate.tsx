@@ -60,25 +60,27 @@ function ConferenceTemplate() {
     }
   }, [user]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     disconnect();
-  //   };
-  // }, [id]);
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [id]);
 
   useEffect(() => {
     if (user && socket && isJoin) {
-      // socket?.emit('login', user);
-
-      socket.once('exit', (users) => {
-        console.log(users);
+      socket.on('exit', (users) => {
+        addJoinedUsers(users);
       });
 
-      socket.once('joined', (users) => {
+      socket.on('joined', (users) => {
         if (users) {
           addJoinedUsers(users);
-          createOffer();
         }
+      });
+
+      socket.once('send-offer', () => {
+        console.log(1);
+        createOffer();
       });
 
       socket.on('messaged', (data) => setMes(data));
@@ -89,7 +91,6 @@ function ConferenceTemplate() {
 
       socket.on('getAnswer', (sdp: RTCSessionDescription) => {
         if (!newConnectionRef.current) return;
-        console.log('ans', sdp);
         newConnectionRef.current.setRemoteDescription(
           new RTCSessionDescription(sdp),
         );
