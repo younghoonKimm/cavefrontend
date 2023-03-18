@@ -89,6 +89,10 @@ function ConferenceTemplate() {
         createAnswer(sdp);
       });
 
+      socket.on('get-capability', (mediasoupWorkers) => {
+        console.log(mediasoupWorkers);
+      });
+
       socket.on('getAnswer', (sdp: RTCSessionDescription) => {
         if (!newConnectionRef.current) return;
         newConnectionRef.current.setRemoteDescription(

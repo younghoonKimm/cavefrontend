@@ -1,6 +1,7 @@
-import { IUser } from '@/types/auth';
+import { IUser, User } from '@/types/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
+import { Device } from 'mediasoup-client';
 
 const pc_config = {
   iceServers: [
@@ -26,7 +27,10 @@ interface OfferType {
   audio: boolean;
 }
 
-export default function useMedia(socket: Socket | undefined, user) {
+export default function useMedia(
+  socket: Socket | undefined,
+  user: IUser | undefined,
+) {
   const [offerOpt, setOffetOpt] = useState<OfferType>({
     video: true,
     audio: false,
@@ -94,6 +98,22 @@ export default function useMedia(socket: Socket | undefined, user) {
       video: true,
       audio: true,
     });
+
+  const [device, setDevice] = useState();
+
+  const createDevice = async () => {
+    try {
+      const device = new Device();
+
+      // https://mediasoup.org/documentation/v3/mediasoup-client/api/#device-load
+      // Loads the device with RTP capabilities of the Router (server side)
+      // await device.load({ routerRtpCapabilities });
+
+      console.log('RTP Capabilities', device.rtpCapabilities);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onVideo = async () => {
     const stream = await getUserStram();
