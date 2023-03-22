@@ -48,6 +48,7 @@ function ConferenceTemplate() {
     createOffer,
     onVideo,
     createAnswer,
+    createDevice,
   } = useMedia(socket, user);
 
   const isConnected = socket && user;
@@ -90,7 +91,7 @@ function ConferenceTemplate() {
       });
 
       socket.on('get-capability', (mediasoupWorkers) => {
-        console.log(mediasoupWorkers);
+        createDevice(mediasoupWorkers);
       });
 
       socket.on('getAnswer', (sdp: RTCSessionDescription) => {

@@ -36,6 +36,7 @@ export default function useMedia(
     audio: false,
   });
   const [myStream, setMyStream] = useState<any>();
+  const [producerTransport, setProducerTransport] = useState<any>();
 
   const newConnectionRef = useRef<RTCPeerConnection>();
   const localStreamRef = useRef<MediaStream>(null);
@@ -99,21 +100,97 @@ export default function useMedia(
       audio: true,
     });
 
-  const [device, setDevice] = useState();
+  const [device, setDevice] = useState<Device>();
 
-  const createDevice = async () => {
+  const createDevice = async (rtpCapabilities: any) => {
     try {
-      const device = new Device();
+      const newDevice = new Device();
 
-      // https://mediasoup.org/documentation/v3/mediasoup-client/api/#device-load
       // Loads the device with RTP capabilities of the Router (server side)
       // await device.load({ routerRtpCapabilities });
 
-      console.log('RTP Capabilities', device.rtpCapabilities);
+      await newDevice.load({
+        routerRtpCapabilities: rtpCapabilities,
+      });
+
+      setDevice(newDevice);
+
+      createSendTransport(newDevice);
     } catch (error) {
       console.log(error);
     }
   };
+
+  const createSendTransport = useCallback(
+    (device: any) => {
+      socket?.emit(
+        'createWebRtcTransport',
+        { consumer: false },
+        ({ params }: { params: any }) => {
+          // if (params?.error) {
+          //   console.log(params.error);
+          //   return;
+          // }
+
+          // creates a new WebRTC Transport to send media
+          // based on the server's producer transport params
+          // https://mediasoup.org/documentation/v3/mediasoup-client/api/#TransportOptions
+          const newProducerTransport = device?.createSendTransport(params);
+          setProducerTransport(newProducerTransport);
+          console.log(newProducerTransport);
+
+          newProducerTransport?.on(
+            'connect',
+            async ({ dtlsParameters }: any, callback: () => void) => {
+              try {
+                // Signal local DTLS parameters to the server side transport
+                // see server's socket.on('transport-connect', ...)
+                await socket?.emit('transport-connect', {
+                  dtlsParameters,
+                });
+
+                // Tell the transport that parameters were transmitted.
+                callback();
+              } catch (error) {
+                return error;
+              }
+            },
+          );
+
+          newProducerTransport?.on(
+            'produce',
+            async (
+              parameters: any,
+              callback: ({ id }: { id: string }) => void,
+            ) => {
+              console.log(parameters);
+
+              try {
+                // tell the server to create a Producer
+                // with the following parameters and produce
+                // and expect back a server side producer id
+                // see server's socket.on('transport-produce', ...)
+                await socket.emit(
+                  'transport-produce',
+                  {
+                    kind: parameters.kind,
+                    rtpParameters: parameters.rtpParameters,
+                    appData: parameters.appData,
+                  },
+                  ({ id }: { id: string }) => {
+                    callback({ id });
+                  },
+                );
+              } catch (error) {
+                // errback(error);
+              }
+            },
+          );
+        },
+      );
+    },
+    [socket, device],
+  );
 
   const onVideo = async () => {
     const stream = await getUserStram();
@@ -197,5 +274,6 @@ export default function useMedia(
     createAnswer,
     offerOpt,
     setOffetOpt,
+    createDevice,
   };
 }
