@@ -40,30 +40,13 @@ export default function useMedia(
   const [consumingTransports, setConsumingTransports] = useState<any>([]);
   const [audioParams, setAudioParams] = useState<any>(null);
   const [videoParams, setVideoParams] = useState<any>(null);
+  const [rtpCapabilities, setRtpCapabilities] = useState(null);
+  const [device, setDevice] = useState<Device>();
   const newConnectionRef = useRef<RTCPeerConnection>();
   const localStreamRef = useRef<MediaStream>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-
-  // const getLocalStream = useCallback(async () => {
-  //   try {
-  //     const localStream = await navigator.mediaDevices.getUserMedia({
-  //       audio: true,
-  //       video: {
-  //         width: 240,
-  //         height: 240,
-  //       },
-  //     });
-  //     localStreamRef.current = localStream;
-  //     if (localVideoRef.current) localVideoRef.current.srcObject = localStream;
-  //     if (socket) {
-  //       socket?.emit('login', user);
-  //     }
-  //   } catch (e) {
-  //     console.log(`getUserMedia error: ${e}`);
-  //   }
-  // }, []);
 
   useEffect(() => {
     newConnectionRef.current = new RTCPeerConnection(pc_config);
@@ -102,14 +85,9 @@ export default function useMedia(
       audio: true,
     });
 
-  const [device, setDevice] = useState<Device>();
-
   const createDevice = async (rtpCapabilities: any) => {
     try {
       const newDevice = new Device();
-
-      // Loads the device with RTP capabilities of the Router (server side)
-      // await device.load({ routerRtpCapabilities });
 
       await newDevice.load({
         routerRtpCapabilities: rtpCapabilities,
@@ -118,21 +96,24 @@ export default function useMedia(
       setDevice(newDevice);
 
       createSendTransport(newDevice);
+
+      socket?.on('new-producer', ({ producerId }) =>
+        signalNewConsumerTransport(producerId, device),
+      );
     } catch (error) {
       console.log(error);
     }
   };
 
-  // socket?.on('new-producer', ({ producerId }) =>
-  //   signalNewConsumerTransport(producerId),
-  // );
-
-  const signalNewConsumerTransport = async (remoteProducerId: any) => {
+  const signalNewConsumerTransport = async (
+    remoteProducerId: any,
+    device: any,
+  ) => {
     //check if we are already consuming the remoteProducerId
     if (consumingTransports.includes(remoteProducerId)) return;
     setConsumingTransports(remoteProducerId);
 
-    await socket?.emit(
+    socket?.emit(
       'createWebRtcTransport',
       { consumer: true },
       ({ params }: any) => {
@@ -142,22 +123,14 @@ export default function useMedia(
           console.log(params.error);
           return;
         }
-        console.log(`PARAMS... ${params}`);
 
         let consumerTransport;
-        try {
-          consumerTransport = device?.createRecvTransport(params);
-        } catch (error) {
-          // exceptions:
-          // {InvalidStateError} if not loaded
-          // {TypeError} if wrong arguments.
-          console.log(error);
-          return;
-        }
+
+        consumerTransport = device?.createRecvTransport(params);
 
         consumerTransport?.on(
           'connect',
-          async ({ dtlsParameters }, callback, errback) => {
+          async ({ dtlsParameters }: any, callback: any) => {
             try {
               // Signal local DTLS parameters to the server side transport
               // see server's socket.on('transport-recv-connect', ...)
@@ -170,7 +143,7 @@ export default function useMedia(
               callback();
             } catch (error: any) {
               // Tell the transport that something was wrong
-              errback(error);
+              console.log(error);
             }
           },
         );
@@ -180,12 +153,11 @@ export default function useMedia(
     );
   };
 
-  const getProducers = () => {
+  const getProducers = (device: any) => {
     socket?.emit('getProducers', (producerIds: string[]) => {
       console.log(producerIds);
-      // for each of the producer create a consumer
-      // producerIds.forEach(id => signalNewConsumerTransport(id))
-      producerIds.forEach(signalNewConsumerTransport);
+
+      producerIds.forEach((v) => signalNewConsumerTransport(v[0], device));
     });
   };
 
@@ -237,7 +209,7 @@ export default function useMedia(
                 // with the following parameters and produce
                 // and expect back a server side producer id
                 // see server's socket.on('transport-produce', ...)
-                await socket.emit(
+                await socket?.emit(
                   'transport-produce',
                   {
                     kind: parameters.kind,
@@ -246,9 +218,8 @@ export default function useMedia(
                   },
                   ({ id, isProducer }: { id: string; isProducer: boolean }) => {
                     callback({ id });
-
-                    console.log('prd', id);
-                    if (isProducer) getProducers();
+                    console.log(isProducer);
+                    if (isProducer) getProducers(device);
                   },
                 );
               } catch (error) {
@@ -314,7 +285,8 @@ export default function useMedia(
     remoteProducerId: any,
     serverConsumerTransportId: any,
   ) => {
-    console.log(consumerTransport, remoteProducerId, serverConsumerTransportId);
+    console.log(consumerTransport);
+    // console.log(consumerTransport, remoteProducerId, serverConsumerTransportId);
     // for consumer, we need to tell the server first
     // to create a consumer based on the rtpCapabilities and consume
     // if the router can consume, it will send back a set of params as below
@@ -360,6 +332,11 @@ export default function useMedia(
         };
 
         socket?.emit('login', user);
+
+        socket.on('joinRoom', (rtpCapabilities) => {
+          setRtpCapabilities(rtpCapabilities);
+          createDevice(rtpCapabilities);
+        });
       }
     } catch (err) {
       /* handle the error */

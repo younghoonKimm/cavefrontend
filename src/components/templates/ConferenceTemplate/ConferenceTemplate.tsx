@@ -90,35 +90,18 @@ function ConferenceTemplate() {
         createAnswer(sdp);
       });
 
-      socket.on('get-capability', (mediasoupWorkers) => {
-        createDevice(mediasoupWorkers);
-      });
-
-      socket.on('getAnswer', (sdp: RTCSessionDescription) => {
-        if (!newConnectionRef.current) return;
-        newConnectionRef.current.setRemoteDescription(
-          new RTCSessionDescription(sdp),
-        );
-      });
-
-      socket.on('getCandidate', async (candidate: RTCIceCandidateInit) => {
-        if (!newConnectionRef.current) return;
-
-        await newConnectionRef.current.addIceCandidate(
-          new RTCIceCandidate(candidate),
-        );
-      });
+      // socket.on('get-capability', (mediasoupWorkers) => {
+      //   createDevice(mediasoupWorkers);
+      // });
 
       onJoined();
 
       return () => {
         socket.off('messaged', (data) => setMes(data));
         socket.off('getOffer', (users) => addJoinedUsers(users));
-        socket.off('getAnswer', (users) => addJoinedUsers(users));
-        socket.off('getCandidate', (users) => addJoinedUsers(users));
       };
     }
-  }, [socket, user, isJoin, newConnectionRef]);
+  }, [socket, user, isJoin]);
 
   const onSubmit = useCallback(() => {
     socket?.emit('message', mes);
@@ -155,19 +138,7 @@ function ConferenceTemplate() {
                   {Object.values(joinedUsers).map((joinUser: any) => (
                     <div key={joinUser.id}>{joinUser.name}</div>
                   ))}
-                  <div>
-                    {/* <video
-                      id="remotevideo"
-                      style={{
-                        width: 240,
-                        height: 240,
-                        margin: 5,
-                        backgroundColor: 'black',
-                      }}
-                      ref={remoteVideoRef}
-                      autoPlay
-                    ></video> */}
-                  </div>
+                  <div></div>
                 </div>
               )}
             </>
