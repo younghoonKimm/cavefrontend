@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 function GoolgeLoginButton() {
   return (
-    <StyledLink href={'http://localhost:3002/api/auth/google'}>
+    <StyledLink href={'http://localhost:3001/api/auth/google'}>
       <GoogleIcon width={22} height={22} />
       Sign in with Google
     </StyledLink>
