@@ -1,6 +1,6 @@
-import NetworkError from '@/components/organisms/Error/NetworkError';
 import { AxiosError } from 'axios';
 import React from 'react';
+import NetworkError from '@/components/organisms/Error/NetworkError';
 
 interface ApiErrorBoundaryType {
   shouldHandleError: boolean;
