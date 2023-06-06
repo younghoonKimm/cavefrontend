@@ -62,6 +62,7 @@ export function useGetConferences(auth: IUser | undefined): {
     getConferences,
     {
       enabled: Boolean(auth),
+      onError: (error) => console.log(error),
     },
   );
 
@@ -73,6 +74,7 @@ export function useGetConference(
   auth: IUser | undefined,
 ): {
   conference: IConference | undefined;
+  userLoading: boolean;
 } {
   const { data: conference, isLoading: userLoading } = useQuery(
     [QUERYKEY_CONFERENCE, id],
@@ -84,7 +86,7 @@ export function useGetConference(
     },
   );
 
-  return { conference };
+  return { conference, userLoading };
 }
 
 export async function deleteConference(id: string): Promise<void> {

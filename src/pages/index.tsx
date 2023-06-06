@@ -1,24 +1,23 @@
 import Head from 'next/head';
-
+import dynamic from 'next/dynamic';
 import { GetServerSideProps, NextPage } from 'next';
-import useAuth, { getMe } from '@/hooks/api/useAuth';
-
 import { dehydrate, QueryClient } from '@tanstack/react-query';
+
+import { getMe } from '@/hooks/api/useAuth';
 import { QUERYKEY_CONFERENCES, QUERYKEY_USER } from 'constants/queryKeys';
-
-import Layout from '@/components/templates/Layout/Layout';
-
-import { getConferences, useGetConferences } from '@/hooks/api/useConference';
-import Conferences from '@/components/organisms/Conferences/Conferences';
+import { getConferences } from '@/hooks/api/useConference';
 import { withAuth } from '@/utils/getServerSide';
 
-import { useEffect } from 'react';
+import ApiErrorBoundary from './APIErrorBoundary';
+
+const ConferenceListTemplate = dynamic(
+  () =>
+    import(
+      '@/components/templates/ConferenceListTemplate/ConferenceListTemplate'
+    ),
+);
 
 const Home: NextPage = () => {
-  const { user } = useAuth();
-
-  const { conferences } = useGetConferences(user);
-
   return (
     <>
       <Head>
@@ -27,15 +26,10 @@ const Home: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
-        <section>
-          {user && conferences ? (
-            <Conferences conferences={conferences} />
-          ) : (
-            <div></div>
-          )}
-        </section>
-      </Layout>
+
+      <ApiErrorBoundary>
+        <ConferenceListTemplate />
+      </ApiErrorBoundary>
     </>
   );
 };

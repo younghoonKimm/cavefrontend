@@ -5,7 +5,9 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-
+  experimental: {
+    reactMode: 'concurrent',
+  },
   // publicRuntimeConfig: {
   //   // Will be available on both server and client
   //   backendUrl: process.env.NEXT_PUBLIC_API_URL,

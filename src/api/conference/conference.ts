@@ -31,9 +31,10 @@ export const deleteConferenceAPI = async (id: string) => {
 export const getConferenceAPI = async (id: string) => {
   try {
     const res = await axiosInstance.get(`/conference/${id}`);
+
     return res;
   } catch (e) {
-    throw new Error();
+    return Promise.reject(e);
   }
 };
 

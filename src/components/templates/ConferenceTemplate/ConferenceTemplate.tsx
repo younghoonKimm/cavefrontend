@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import ConferenceForm from '@/components/molecules/Conference/ConferenceForm';
 import useAuth from '@/hooks/api/useAuth';
@@ -37,7 +37,8 @@ function ConferenceTemplate() {
   const [joinedUsers, setJoinedUsers] = useState<PartialUserType[]>([]);
   const [mes, setMes] = useState<string>('');
 
-  const { conference } = useGetConference(id as string, user);
+  const { conference, userLoading } = useGetConference(id as string, user);
+
   const { pathAgenda } = usePatchAgneda();
 
   const {
@@ -116,54 +117,52 @@ function ConferenceTemplate() {
 
   return (
     <Layout>
-      <>
+      <div>
         <div>
-          <div>
-            <Video ref={localVideoRef} autoPlay muted />
-          </div>
-          <div>
-            <Video ref={remoteVideoRef} autoPlay muted />
-          </div>
-          {isJoin ? (
-            <>
-              {isConnected && (
-                <div>
-                  <button type="button" onClick={() => onSubmit()}>
-                    <span>button</span>
-                  </button>
-                  <button onClick={onPatchAgenda}>
-                    <span>onPath</span>
-                  </button>
-                  <ConferenceForm text={mes} setText={setMes} />
-                  {Object.values(joinedUsers).map((joinUser: any) => (
-                    <div key={joinUser.id}>{joinUser.name}</div>
-                  ))}
-                  <div></div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div>
-              <button
-                type="button"
-                onClick={() => {
-                  onVideo();
-                }}
-              >
-                연결하기
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setisJoin(true);
-                }}
-              >
-                입장하기
-              </button>
-            </div>
-          )}
+          <Video ref={localVideoRef} autoPlay muted />
         </div>
-      </>
+        <div>
+          <Video ref={remoteVideoRef} autoPlay muted />
+        </div>
+        {isJoin ? (
+          <>
+            {isConnected && (
+              <div>
+                <button type="button" onClick={() => onSubmit()}>
+                  <span>button</span>
+                </button>
+                <button onClick={onPatchAgenda}>
+                  <span>onPath</span>
+                </button>
+                <ConferenceForm text={mes} setText={setMes} />
+                {Object.values(joinedUsers).map((joinUser: any) => (
+                  <div key={joinUser.id}>{joinUser.name}</div>
+                ))}
+                <div></div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div>
+            <button
+              type="button"
+              onClick={() => {
+                onVideo();
+              }}
+            >
+              연결하기
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setisJoin(true);
+              }}
+            >
+              입장하기
+            </button>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 }

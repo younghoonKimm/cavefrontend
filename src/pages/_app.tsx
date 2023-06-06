@@ -39,9 +39,7 @@ export default function App({
       <RecoilRoot>
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps.dehydratedState}>
-            <ErrorBoundary fallback={<div></div>}>
-              <Component {...pageProps} />
-            </ErrorBoundary>
+            <Component {...pageProps} />
           </Hydrate>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>

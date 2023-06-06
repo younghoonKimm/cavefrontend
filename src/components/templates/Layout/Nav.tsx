@@ -21,8 +21,9 @@ function Nav() {
   useEffect(() => {
     if (!user) {
       resetTokens();
+      router.replace('/');
     }
-  }, [user]);
+  }, [user, router]);
 
   const signUp = () => router.push('/login');
 

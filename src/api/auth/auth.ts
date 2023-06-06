@@ -1,10 +1,30 @@
-import { IUser } from '@/types/auth';
+// import { IUser } from '@/types/auth';
 
 import axiosInstance from '../axios';
 
-export const getProfileAPI = async () => await axiosInstance.get('/auth/me');
+export const getProfileAPI = async () => {
+  try {
+    const res = await axiosInstance.get('/auth/me');
+    return res;
+  } catch (e) {
+    throw e;
+  }
+};
 
-export const logOutAPI = async () => await axiosInstance.get(`/auth/logout`);
+export const logOutAPI = async () => {
+  try {
+    const res = await axiosInstance.get(`/auth/logout`);
+    return res;
+  } catch (e) {
+    throw e;
+  }
+};
 
-export const getNewTokenAPI = async () =>
-  await axiosInstance.get(`/auth/getToken`);
+export const getNewTokenAPI = async () => {
+  try {
+    const res = await axiosInstance.get(`/auth/getToken`);
+    return res;
+  } catch (e) {
+    throw e;
+  }
+};

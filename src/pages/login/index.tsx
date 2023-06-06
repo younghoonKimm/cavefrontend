@@ -1,14 +1,13 @@
 import { NextPage } from 'next';
+import dynamic from 'next/dynamic';
 import React from 'react';
 
-import LoginTemplate from '@/components/templates/LoginTemplate/Login';
+const LoginTemplate = dynamic(
+  () => import('@/components/templates/LoginTemplate/Login'),
+);
 
 const Login: NextPage = () => {
-  return (
-    <div>
-      <LoginTemplate />
-    </div>
-  );
+  return <LoginTemplate />;
 };
 
 export default Login;

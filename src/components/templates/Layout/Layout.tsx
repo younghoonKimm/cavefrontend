@@ -7,16 +7,16 @@ import { modalAtoms } from '@/states/common';
 import Modal from '@/components/atoms/Modal/Modal';
 import useModal from '@/hooks/useModal';
 import dynamic from 'next/dynamic';
-// import Nav from './Nav';
+import useAuth from '@/hooks/api/useAuth';
 
 interface LayoutProps extends Comp {
   isNav?: boolean;
 }
 const Nav = dynamic(() => import('./Nav'), { ssr: false });
 
-function Layout({ children, isNav = false }: LayoutProps) {
+function Layout({ children, isNav = true }: LayoutProps) {
   const [showComponent, setShowComponent] = useState(false);
-
+  const { user, clearUserQuery } = useAuth();
   const { modalOption, onCloseModal } = useModal();
   const { isModal, modalType } = modalOption;
 
@@ -29,9 +29,7 @@ function Layout({ children, isNav = false }: LayoutProps) {
       {isModal ? (
         <Modal onClose={onCloseModal} isOpen={true} modalType={modalType} />
       ) : null}
-      <header>
-        <Nav />
-      </header>
+      <header>{isNav && <Nav />}</header>
       <main role="main">{showComponent ? children : null}</main>
       <footer></footer>
     </div>

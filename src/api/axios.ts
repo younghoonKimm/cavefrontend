@@ -51,7 +51,20 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
-    return getRefreshToken(error);
+    if (error.response?.status === 403) {
+      resetAuth();
+
+      return;
+    }
+    if (error.response?.status === 401) {
+      try {
+        return await getRefreshToken(error);
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    throw error;
   },
 );
 
