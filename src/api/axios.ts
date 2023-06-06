@@ -13,9 +13,6 @@ const axiosInstance = axios.create({
 
 const resetAuth = () => {
   resetTokens();
-  // if (window) {
-  //   window.location.href = '/';
-  // }
 };
 
 export const getRefreshToken = async (error: any) => {
@@ -53,7 +50,6 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 403) {
       resetAuth();
-
       return;
     }
     if (error.response?.status === 401) {

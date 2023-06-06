@@ -6,7 +6,7 @@ export const postConferenceAPI = async (conferenceData: any) => {
     const res = await axiosInstance.post('/conference/create', conferenceData);
     return res;
   } catch (e) {
-    throw new Error();
+    throw e;
   }
 };
 
@@ -15,7 +15,7 @@ export const getConferencesAPI = async () => {
     const res = await axiosInstance.get('/conference');
     return res;
   } catch (e) {
-    throw new Error();
+    throw e;
   }
 };
 
@@ -24,7 +24,7 @@ export const deleteConferenceAPI = async (id: string) => {
     const res = await axiosInstance.delete(`/conference/${id}`);
     return res;
   } catch (e) {
-    throw new Error();
+    throw e;
   }
 };
 
@@ -34,7 +34,7 @@ export const getConferenceAPI = async (id: string) => {
 
     return res;
   } catch (e) {
-    return Promise.reject(e);
+    throw e;
   }
 };
 

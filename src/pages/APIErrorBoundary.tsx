@@ -1,10 +1,22 @@
-import NetworkError from '@/components/organisms/Error/NetworkError';
+import { AxiosError } from 'axios';
 import React from 'react';
+import NetworkError from '@/components/organisms/Error/NetworkError';
 
-class ApiErrorBoundary extends React.Component {
-  state: { shouldHandleError: boolean; shouldRethrow: boolean; error: any };
+interface ApiErrorBoundaryType {
+  shouldHandleError: boolean;
+  shouldRethrow: boolean;
+  error: AxiosError | Error | null;
+}
 
-  constructor(props: any) {
+interface ApiErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+class ApiErrorBoundary extends React.Component<
+  ApiErrorBoundaryProps,
+  ApiErrorBoundaryType
+> {
+  constructor(props: { children: any }) {
     super(props);
     this.state = {
       shouldHandleError: false,
@@ -13,7 +25,7 @@ class ApiErrorBoundary extends React.Component {
     };
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): ApiErrorBoundaryType {
     if (error) {
       return {
         // 여기서 처리 할 수 없는 에러라면 render 단계에서 rethrow 하여 상위 에러 바운더리에서 처리
@@ -31,18 +43,16 @@ class ApiErrorBoundary extends React.Component {
   }
 
   render() {
-    console.log(this.state.error);
     if (this.state.shouldRethrow) {
       throw this.state.error;
     }
     if (!this.state.shouldHandleError) {
-      //@ts-ignore
       return this.props.children;
     }
     if (this.state.error?.message) {
       return <NetworkError />;
     }
-    //@ts-ignore
+
     return this.props.children;
   }
 }
