@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { GoolgeLoginButton } from '@/components/molecules/Login';
 
 function LoginTemplate() {
