@@ -27,6 +27,7 @@ class ApiErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: Error): ApiErrorBoundaryType {
     if (error) {
+      console.log(error);
       return {
         // 여기서 처리 할 수 없는 에러라면 render 단계에서 rethrow 하여 상위 에러 바운더리에서 처리
         shouldHandleError: true,

@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 403) {
       resetAuth();
-      return;
+      throw error;
     }
     if (error.response?.status === 401) {
       try {

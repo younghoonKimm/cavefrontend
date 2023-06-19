@@ -18,12 +18,12 @@ function Nav() {
 
   const { openModal } = useModal();
 
-  useEffect(() => {
-    if (!user) {
-      resetTokens();
-      router.replace('/');
-    }
-  }, [user, router]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     resetTokens();
+  //     router.replace('/');
+  //   }
+  // }, [user]);
 
   const signUp = () => router.push('/login');
 

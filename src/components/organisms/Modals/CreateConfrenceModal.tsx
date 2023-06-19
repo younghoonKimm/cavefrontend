@@ -14,6 +14,8 @@ function CreateConfrenceModal() {
     users: [],
   });
 
+  console.log(user);
+
   useEffect(() => {
     if (user) {
       setConferenceData({

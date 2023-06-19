@@ -34,7 +34,8 @@ export default function useAuth(): UseAuthReturnType {
     {
       enabled: at && rt,
       retry: 0,
-
+      staleTime: 600000,
+      cacheTime: 600000,
       onError: (err) => {},
     },
   );

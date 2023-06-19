@@ -32,11 +32,83 @@ next, typescript를 통한 리뉴얼 작업 예정
 - [ ] Notification
 - [ ] Socket Room
 
-## Learn More
+## 계획
 
-To learn more about Next.js, take a look at the following resources:
+### 개발기간
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2023.06 러프하게 기능 논의, 개발 스펙 선택 중
+2023.07 기획 완료 예정
+2023.07 디자인 작업
+2023.07 ~ 2024.01로 예상
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Recoil
+
+이전 컬러버스앱 프로젝트에선 React-query + jotai의 조합을 사용하였는데 Recoil을 사용하는 곳이 더 많아 보여서 러닝커브가 그렇게 높지 않아 보여 Recoil로 상태 관리를 하려고 한다.
+
+### 에러 처리
+
+```js
+import { AxiosError } from 'axios';
+import React from 'react';
+import NetworkError from '@/components/organisms/Error/NetworkError';
+
+interface ApiErrorBoundaryType {
+  shouldHandleError: boolean;
+  shouldRethrow: boolean;
+  error: AxiosError | Error | null;
+}
+
+interface ApiErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+class ApiErrorBoundary extends React.Component<
+  ApiErrorBoundaryProps,
+  ApiErrorBoundaryType,
+> {
+  constructor(props: { children: any }) {
+    super(props);
+    this.state = {
+      shouldHandleError: false,
+      shouldRethrow: false,
+      error: null,
+    };
+  }
+
+  static getDerivedStateFromError(error: Error): ApiErrorBoundaryType {
+    if (error) {
+      console.log(error);
+      return {
+        // 여기서 처리 할 수 없는 에러라면 render 단계에서 rethrow 하여 상위 에러 바운더리에서 처리
+        shouldHandleError: true,
+        shouldRethrow: false,
+        error: error,
+      };
+    }
+
+    return {
+      shouldHandleError: false,
+      shouldRethrow: false,
+      error: null,
+    };
+  }
+
+  render() {
+    if (this.state.shouldRethrow) {
+      throw this.state.error;
+    }
+    if (!this.state.shouldHandleError) {
+      return this.props.children;
+    }
+    if (this.state.error?.message) {
+      return <NetworkError />;
+    }
+
+    return this.props.children;
+  }
+}
+
+export default ApiErrorBoundary;
+```
+
+현재 계획은 APIErrorboundary들로 감싸서 해당 페이지 API단에서 발생하는 에러들을 처리할 생각이고 그 이외 크리티컬 하거나 공통적인 error는 상위 Errorboundary로 처리 예정
