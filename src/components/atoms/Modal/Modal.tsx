@@ -4,7 +4,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import Portal from '../Portal/Portal';
-import { useModals } from './helper';
+import { useModals } from '@/components/organisms/Modals/helper';
 
 interface ModalProps extends Comp {
   isOpen: boolean;
