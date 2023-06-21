@@ -1,4 +1,4 @@
-FROM node:latest as builder
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY package.json ./
 
 COPY yarn.lock ./
 
-RUN yarn install --ignore-engines
+RUN yarn install --ignore-scripts
 
 RUN rm -rf ./.next/cachek
 
@@ -16,6 +16,6 @@ ENV NODE_ENV dev
 
 RUN yarn build
 
-EXPOSE 3000
+RUN yarn build
 
 CMD ["yarn", "dev"]

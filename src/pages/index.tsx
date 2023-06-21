@@ -9,6 +9,7 @@ import { getConferences } from '@/hooks/api/useConference';
 import { withAuth } from '@/utils/getServerSide';
 
 import ApiErrorBoundary from './APIErrorBoundary';
+import { Suspense } from 'react';
 
 const ConferenceListTemplate = dynamic(
   () =>
@@ -28,7 +29,9 @@ const Home: NextPage = () => {
       </Head>
 
       <ApiErrorBoundary>
-        <ConferenceListTemplate />
+        <Suspense>
+          <ConferenceListTemplate />
+        </Suspense>
       </ApiErrorBoundary>
     </>
   );

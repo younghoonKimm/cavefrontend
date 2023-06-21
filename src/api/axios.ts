@@ -32,6 +32,7 @@ export const getRefreshToken = async (error: any) => {
       const originRes = await axiosInstance.request(originalRequest);
       return originRes;
     } catch (error) {
+      console.log('error reset token');
       resetAuth();
     }
   }
@@ -40,7 +41,7 @@ export const getRefreshToken = async (error: any) => {
     return resetAuth();
   }
 
-  return Promise.reject(error);
+  throw error;
 };
 
 axiosInstance.interceptors.response.use(
