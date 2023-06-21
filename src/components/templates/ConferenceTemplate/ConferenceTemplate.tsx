@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import ConferenceForm from '@/components/molecules/Conference/ConferenceForm';
 import useAuth from '@/hooks/api/useAuth';
@@ -9,20 +9,6 @@ import Layout from '../Layout/Layout';
 import { useGetConference } from '@/hooks/api/useConference';
 import { usePatchAgneda } from '@/hooks/api/useAgenda';
 import { PartialUserType, User } from '@/types/auth';
-import useMedia from '@/hooks/useMedia';
-
-const pc_config = {
-  iceServers: [
-    // {
-    //   urls: 'stun:[STUN_IP]:[PORT]',
-    //   'credentials': '[YOR CREDENTIALS]',
-    //   'username': '[USERNAME]'
-    // },
-    {
-      urls: 'stun:stun.l.google.com:19302',
-    },
-  ],
-};
 
 function ConferenceTemplate() {
   const router = useRouter();
@@ -30,7 +16,7 @@ function ConferenceTemplate() {
 
   const { user } = useAuth();
 
-  // const [socket, disconnect] = useSocket(id as string);
+  const [socket, disconnect] = useSocket(id as string);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isJoin, setisJoin] = useState<boolean>(false);
   const [joinedUsers, setJoinedUsers] = useState<PartialUserType[]>([]);
@@ -40,53 +26,61 @@ function ConferenceTemplate() {
 
   const { pathAgenda } = usePatchAgneda();
 
-  const isConnected = user;
+  const isConnected = socket && user;
 
   const addJoinedUsers = (users: PartialUserType[]) => setJoinedUsers(users);
 
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.replace('/');
-  //   }
-  // }, [user]);
+  const onJoined = async () => {
+    try {
+      if (!socket) return;
 
-  // useEffect(() => {
-  //   return () => {
-  //     disconnect();
-  //   };
-  // }, [id]);
+      if (socket) {
+        socket?.emit('login', user);
 
-  // useEffect(() => {
-  //   if (user && socket && isJoin) {
-  //     socket.on('exit', (users) => {
-  //       addJoinedUsers(users);
-  //     });
-  //     socket.on('joined', (users) => {
-  //       if (users) {
-  //         addJoinedUsers(users);
-  //       }
-  //     });
-  //     socket.once('send-offer', () => {
-  //       console.log(1);
-  //       createOffer();
-  //     });
-  //     socket.on('messaged', (data) => setMes(data));
-  //     socket.on('getOffer', (sdp: RTCSessionDescription) => {
-  //       createAnswer(sdp);
-  //     });
-  //     // socket.on('get-capability', (mediasoupWorkers) => {
-  //     //   createDevice(mediasoupWorkers);
-  //     // });
-  //     onJoined();
-  //     return () => {
-  //       socket.off('messaged', (data) => setMes(data));
-  //       socket.off('getOffer', (users) => addJoinedUsers(users));
-  //     };
-  //   }
-  // }, [socket, user, isJoin]);
+        socket.on('joinRoom', (room) => {
+          console.log(room);
+        });
+      }
+    } catch (err) {
+      /* handle the error */
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (user && socket && isJoin) {
+      onJoined();
+
+      socket.on('exit', (users) => {
+        addJoinedUsers(users);
+      });
+
+      socket.on('joined', (users) => {
+        if (users) {
+          addJoinedUsers(users);
+        }
+      });
+
+      socket.on('messaged', (data) => {
+        console.log(data);
+        setMes(data);
+      });
+
+      return () => {
+        socket.off('messaged', (data) => setMes(data));
+        socket.off('join', (users) => addJoinedUsers(users));
+      };
+    }
+  }, [socket, user, isJoin]);
 
   const onSubmit = useCallback(() => {
-    // socket?.emit('message', mes);
+    console.log(mes);
+    socket?.emit('message', mes);
   }, [mes]);
 
   const onPatchAgenda = useCallback(
@@ -109,7 +103,7 @@ function ConferenceTemplate() {
                 <button onClick={onPatchAgenda}>
                   <span>onPath</span>
                 </button>
-                {/* <ConferenceForm text={mes} setText={setMes} /> */}
+                <ConferenceForm text={mes} setText={setMes} />
                 {Object.values(joinedUsers).map((joinUser: any) => (
                   <div key={joinUser.id}>{joinUser.name}</div>
                 ))}

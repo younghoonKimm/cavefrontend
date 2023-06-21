@@ -29,7 +29,7 @@ const useSocket = (conference: string): [Socket | undefined, () => void] => {
     });
   }
 
-  return [undefined, disconnect];
+  return [sockets[conference], disconnect];
 };
 
 // const useSocket = (conference?: string): [Socket | undefined, () => void] => {

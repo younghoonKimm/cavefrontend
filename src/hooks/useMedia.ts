@@ -314,23 +314,7 @@ export default function useMedia(
     try {
       if (!socket) return;
 
-      if (newConnectionRef.current && socket) {
-        // await onVideo();
-
-        newConnectionRef.current.onicecandidate = (e) => {
-          if (e.candidate) {
-            socket?.emit('candidate', e.candidate);
-          }
-        };
-
-        newConnectionRef.current.oniceconnectionstatechange = (e) => {};
-
-        newConnectionRef.current.ontrack = (ev) => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = ev.streams[0];
-          }
-        };
-
+      if (socket) {
         socket?.emit('login', user);
 
         socket.on('joinRoom', (rtpCapabilities) => {
