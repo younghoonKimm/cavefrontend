@@ -39,6 +39,8 @@ function Nav() {
     }
   };
 
+  const handleAddConference = () => router.push('/conference/setting');
+
   const onOpenModal = () => openModal('conferenceCreate');
 
   return (
@@ -62,7 +64,7 @@ function Nav() {
             <DefaultButton
               type="button"
               buttonText="생성"
-              onClick={onOpenModal}
+              onClick={handleAddConference}
             />
             <DefaultButton
               type="button"

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import ConferenceForm from '@/components/molecules/Conference/ConferenceForm';
 import useAuth from '@/hooks/api/useAuth';
@@ -9,21 +9,6 @@ import Layout from '../Layout/Layout';
 import { useGetConference } from '@/hooks/api/useConference';
 import { usePatchAgneda } from '@/hooks/api/useAgenda';
 import { PartialUserType, User } from '@/types/auth';
-import useMedia from '@/hooks/useMedia';
-import Video from '@/components/atoms/Video/Video';
-
-const pc_config = {
-  iceServers: [
-    // {
-    //   urls: 'stun:[STUN_IP]:[PORT]',
-    //   'credentials': '[YOR CREDENTIALS]',
-    //   'username': '[USERNAME]'
-    // },
-    {
-      urls: 'stun:stun.l.google.com:19302',
-    },
-  ],
-};
 
 function ConferenceTemplate() {
   const router = useRouter();
@@ -41,26 +26,25 @@ function ConferenceTemplate() {
 
   const { pathAgenda } = usePatchAgneda();
 
-  const {
-    newConnectionRef,
-    remoteVideoRef,
-    onJoined,
-    localVideoRef,
-    createOffer,
-    onVideo,
-    createAnswer,
-    createDevice,
-  } = useMedia(socket, user);
-
   const isConnected = socket && user;
 
   const addJoinedUsers = (users: PartialUserType[]) => setJoinedUsers(users);
 
-  useEffect(() => {
-    if (!user) {
-      router.replace('/');
+  const onJoined = async () => {
+    try {
+      if (!socket) return;
+
+      if (socket) {
+        socket?.emit('login', user);
+
+        socket.on('joinRoom', (room) => {
+          console.log(room);
+        });
+      }
+    } catch (err) {
+      /* handle the error */
     }
-  }, [user]);
+  };
 
   useEffect(() => {
     return () => {
@@ -70,6 +54,8 @@ function ConferenceTemplate() {
 
   useEffect(() => {
     if (user && socket && isJoin) {
+      onJoined();
+
       socket.on('exit', (users) => {
         addJoinedUsers(users);
       });
@@ -80,37 +66,26 @@ function ConferenceTemplate() {
         }
       });
 
-      socket.once('send-offer', () => {
-        console.log(1);
-        createOffer();
+      socket.on('messaged', (data) => {
+        console.log(data);
+        setMes(data);
       });
-
-      socket.on('messaged', (data) => setMes(data));
-
-      socket.on('getOffer', (sdp: RTCSessionDescription) => {
-        createAnswer(sdp);
-      });
-
-      // socket.on('get-capability', (mediasoupWorkers) => {
-      //   createDevice(mediasoupWorkers);
-      // });
-
-      onJoined();
 
       return () => {
         socket.off('messaged', (data) => setMes(data));
-        socket.off('getOffer', (users) => addJoinedUsers(users));
+        socket.off('join', (users) => addJoinedUsers(users));
       };
     }
   }, [socket, user, isJoin]);
 
   const onSubmit = useCallback(() => {
+    console.log(mes);
     socket?.emit('message', mes);
-  }, [socket, mes]);
+  }, [mes]);
 
   const onPatchAgenda = useCallback(
     () => pathAgenda('bfcd87ca-2846-4971-aed5-6bb2507de172'),
-    [socket],
+    [],
   );
 
   const onJoinedRoom = () => setisJoin(true);
@@ -118,12 +93,6 @@ function ConferenceTemplate() {
   return (
     <Layout>
       <div>
-        <div>
-          <Video ref={localVideoRef} autoPlay muted />
-        </div>
-        <div>
-          <Video ref={remoteVideoRef} autoPlay muted />
-        </div>
         {isJoin ? (
           <>
             {isConnected && (
@@ -144,14 +113,7 @@ function ConferenceTemplate() {
           </>
         ) : (
           <div>
-            <button
-              type="button"
-              onClick={() => {
-                onVideo();
-              }}
-            >
-              연결하기
-            </button>
+            <button type="button">연결하기</button>
             <button
               type="button"
               onClick={() => {

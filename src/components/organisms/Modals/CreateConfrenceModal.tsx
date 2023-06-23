@@ -1,9 +1,11 @@
 import useAuth from '@/hooks/api/useAuth';
 import { useCreateConference } from '@/hooks/api/useConference';
+import { useRouter } from 'next/router';
 
 import { useEffect, useState } from 'react';
 
 function CreateConfrenceModal() {
+  const router = useRouter();
   const { user } = useAuth();
   const createConference = useCreateConference();
 
@@ -13,8 +15,6 @@ function CreateConfrenceModal() {
     agendas: [{ title: 'sddssd', text: 'dssddssd' }],
     users: [],
   });
-
-  console.log(user);
 
   useEffect(() => {
     if (user) {
@@ -28,9 +28,12 @@ function CreateConfrenceModal() {
   }, [user]);
 
   const onSubmit = async (data: any) => {
-    if (user) {
-      createConference(conferenceData);
-    }
+    try {
+      if (user) {
+        createConference(conferenceData);
+      }
+      return router.push('/');
+    } catch (e) {}
 
     //
   };

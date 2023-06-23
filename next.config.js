@@ -13,10 +13,6 @@ const nextConfig = {
   experimental: {
     reactMode: 'concurrent',
   },
-  // publicRuntimeConfig: {
-  //   // Will be available on both server and client
-  //   backendUrl: process.env.NEXT_PUBLIC_API_URL,
-  // },
 
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
@@ -24,7 +20,7 @@ const nextConfig = {
 
   publicRuntimeConfig: {
     // Will be available on both server and client
-    URI: 'http://localhost:3002',
+    URI: process.env.NEXT_PUBLIC_API_URL,
   },
 
   images: {
@@ -33,17 +29,16 @@ const nextConfig = {
 
   rewrites: async () => [
     {
-      // has: [{ type: 'host', value: '(?<siteHost>.*)' }],
-
       source: '/api/:path*',
-      destination: 'http://localhost:3000/api/:path*',
+      destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
     },
   ],
 
   webpack: (config, context) => {
     config.watchOptions = {
+      aggregateTimeout: 200,
       poll: 1000,
-      aggregateTimeout: 300,
+      ignored: /node_modules/,
     };
     config.module.rules.push({
       test: /\.svg$/,

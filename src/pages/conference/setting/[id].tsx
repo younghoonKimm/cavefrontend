@@ -4,19 +4,19 @@ import Head from 'next/head';
 
 import ApiErrorBoundary from '../../APIErrorBoundary';
 
-const ConferenceWriteTemplate = dynamic(
-  () => import('@/components/templates/ConferenceWriteTemplate'),
+const ConferenceSettingTemplate = dynamic(
+  () => import('@/components/templates/ConferenceSettingTemplate'),
 );
 
 const ConferenceDetail: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Conference Write</title>
+        <title>Conference Update</title>
       </Head>
 
       <ApiErrorBoundary>
-        <ConferenceWriteTemplate />
+        <ConferenceSettingTemplate />
       </ApiErrorBoundary>
     </>
   );
