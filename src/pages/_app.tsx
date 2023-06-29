@@ -20,8 +20,8 @@ const queryClient = new QueryClient({
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      retry: false,
       suspense: true,
+      networkMode: 'always',
     },
     mutations: {
       // onError: queryErrorHandler,
