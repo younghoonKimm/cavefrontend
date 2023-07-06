@@ -18,13 +18,6 @@ function Nav() {
 
   const { openModal } = useModal();
 
-  // useEffect(() => {
-  //   if (!user) {
-  //     resetTokens();
-  //     router.replace('/');
-  //   }
-  // }, [user]);
-
   const signUp = () => router.push('/login');
 
   const signOut = async () => {
@@ -41,6 +34,8 @@ function Nav() {
 
   const handleAddConference = () => router.push('/conference/setting');
 
+  const handleClickProfile = () => router.push('/profile/setting');
+
   const onOpenModal = () => openModal('conferenceCreate');
 
   return (
@@ -49,7 +44,7 @@ function Nav() {
         <>
           <div>
             {user.profileImg && (
-              <StyledProfileImg>
+              <StyledProfileImg onClick={handleClickProfile}>
                 <Image
                   src={user.profileImg}
                   alt="image"
