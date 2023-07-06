@@ -11,9 +11,19 @@ function ConferenceListTemplate() {
   return (
     <Layout>
       <Suspense fallback={<div>loadign</div>}>
-        {conferences?.map((conference) => (
-          <Conference key={conference.id} conference={conference} />
-        ))}
+        <section>
+          {user?.categories && (
+            <div>
+              {user?.categories.map((category) => (
+                <div key={category.id}>{category.title}</div>
+              ))}
+            </div>
+          )}
+
+          {conferences?.map((conference) => (
+            <Conference key={conference.id} conference={conference} />
+          ))}
+        </section>
       </Suspense>
     </Layout>
   );

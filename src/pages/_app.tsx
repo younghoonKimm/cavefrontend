@@ -20,8 +20,8 @@ const queryClient = new QueryClient({
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      retry: false,
       suspense: true,
+      networkMode: 'always',
     },
     mutations: {
       // onError: queryErrorHandler,
@@ -37,12 +37,14 @@ export default function App({
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <RecoilRoot>
-        <QueryClientProvider client={queryClient}>
-          <Hydrate state={pageProps.dehydratedState}>
-            <Component {...pageProps} />
-          </Hydrate>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <Hydrate state={pageProps.dehydratedState}>
+              <Component {...pageProps} />
+            </Hydrate>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </ErrorBoundary>
       </RecoilRoot>
     </ThemeProvider>
   );

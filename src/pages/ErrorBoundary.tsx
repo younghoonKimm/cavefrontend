@@ -1,51 +1,35 @@
-// import React, { Component, ErrorInfo, ReactNode } from 'react';
-// interface Props {
-//   children: ReactNode;
-//   fallback: ReactNode;
-// }
+import { Component, ErrorInfo, ReactNode } from 'react';
 
-// interface State {
-//   hasError: boolean;
-// }
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback: ReactNode;
+}
 
-// class ErrorBoundary extends Component<Props, State> {
-//   public state: State = {
-//     hasError: false,
-//   };
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
 
-//   public static getDerivedStateFromError(_: Error): State {
-//     // Update state so the next render will show the fallback UI.
-//     return { hasError: true };
-//   }
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
+    hasError: false,
+  };
 
-//   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-//     // console.error("Uncaught error:", error, errorInfo);
-//   }
-
-//   public render() {
-//     if (this.state.hasError) {
-//       return this.props.fallback;
-//     }
-
-//     return this.props.children;
-//   }
-// }
-
-// export default ErrorBoundary;
-import React from 'react';
-
-class ErrorBoundary extends React.Component {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: any) {
+  public static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
 
-  render() {
-    return <div></div>;
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // console.error("Uncaught error:", error, errorInfo);
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      //fallback, 기타 에러 추가
+      return this.props.fallback;
+    }
+
+    return this.props.children;
   }
 }
 

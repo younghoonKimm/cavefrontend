@@ -2,7 +2,7 @@ import { AxiosError } from 'axios';
 import React from 'react';
 import NetworkError from '@/components/organisms/Error/NetworkError';
 
-interface ApiErrorBoundaryType {
+interface ApiErrorBoundaryState {
   shouldHandleError: boolean;
   shouldRethrow: boolean;
   error: AxiosError | Error | null;
@@ -14,7 +14,7 @@ interface ApiErrorBoundaryProps {
 
 class ApiErrorBoundary extends React.Component<
   ApiErrorBoundaryProps,
-  ApiErrorBoundaryType
+  ApiErrorBoundaryState
 > {
   constructor(props: { children: any }) {
     super(props);
@@ -25,7 +25,7 @@ class ApiErrorBoundary extends React.Component<
     };
   }
 
-  static getDerivedStateFromError(error: Error): ApiErrorBoundaryType {
+  static getDerivedStateFromError(error: Error): ApiErrorBoundaryState {
     if (error) {
       console.log(error);
       return {
