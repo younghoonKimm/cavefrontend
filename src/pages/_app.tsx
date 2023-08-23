@@ -37,14 +37,12 @@ export default function App({
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <RecoilRoot>
-        <ErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <Hydrate state={pageProps.dehydratedState}>
-              <Component {...pageProps} />
-            </Hydrate>
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <Hydrate state={pageProps.dehydratedState}>
+            <Component {...pageProps} />
+          </Hydrate>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </RecoilRoot>
     </ThemeProvider>
   );
