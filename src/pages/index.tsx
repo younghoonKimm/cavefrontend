@@ -44,9 +44,9 @@ export const getServerSideProps: GetServerSideProps = withAuth(async () => {
     staleTime: 900,
   });
 
-  await queryClient.prefetchQuery([QUERYKEY_CONFERENCES], getConferences, {
-    staleTime: 900,
-  });
+  // await queryClient.prefetchQuery([QUERYKEY_CONFERENCES], getConferences, {
+  //   staleTime: 900,
+  // });
 
   return {
     props: { dehydratedState: dehydrate(queryClient) },

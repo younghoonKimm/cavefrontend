@@ -9,7 +9,7 @@ export const setAxiosDefaultHeaderCookie = (cookie: string) => {
 
 export const setAxiosDefaultForServerSide = (cookie: string) => {
   setAxiosDefaultHeaderCookie(cookie);
-  axiosInstance.defaults.baseURL = 'http://backend:3001/api';
+  axiosInstance.defaults.baseURL = 'http://localhost:3001/api';
 };
 
 export function withAuth(
@@ -22,6 +22,7 @@ export function withAuth(
     const { CAV_ACC, CAV_RFS } = req.cookies;
     const { cookie } = req.headers;
     const hasCookies = cookie && CAV_ACC && CAV_RFS;
+
     let gsspData;
 
     if (hasCookies) {
@@ -31,15 +32,20 @@ export function withAuth(
 
         if (headers['set-cookie'] && token) {
           res.setHeader('set-cookie', headers['set-cookie']);
+          res.setHeader('Access-Control-Allow-Origin', '*');
+
           setAxiosDefaultHeaderCookie(
             `CAV_RFS=${token.refreshToken}; CAV_ACC=${token.accessToken}`,
           );
 
           gsspData = await gssp(context);
-        } else {
-          throw new Error();
         }
+
+        // else {
+        //   throw new Error();
+        // }
       } catch (error) {
+        console.log(error);
         res.setHeader('set-cookie', [
           `CAV_ACC=""; Max-Age=0`,
           `CAV_RFS=""; Max-Age=0`,

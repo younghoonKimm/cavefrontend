@@ -26,9 +26,10 @@ function Nav() {
 
       if (res) {
         clearUserQuery();
+        router.push('/');
       }
     } catch (error) {
-      console.log(error);
+      console.log(error, 'logout');
     }
   };
 

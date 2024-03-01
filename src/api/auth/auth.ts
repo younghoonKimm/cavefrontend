@@ -13,9 +13,11 @@ export const getProfileAPI = async () => {
 
 export const logOutAPI = async () => {
   try {
-    const res = await axiosInstance.get(`/auth/logout`);
+    // const res = await axiosInstance.post(`/auth/logout`);
+
     return res;
   } catch (e) {
+    console.log(e);
     throw e;
   }
 };
