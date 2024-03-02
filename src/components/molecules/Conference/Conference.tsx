@@ -24,7 +24,7 @@ function Conference({ conference }: ConferenceProps) {
     <StyledConferenceContainer>
       <StyledRouterButton onClick={() => router.push(`conference/${id}`)}>
         <StyledInfoContainer>
-          x<StyledTitle>{title}</StyledTitle>
+          <StyledTitle>{title}</StyledTitle>
           <StyledDate>{date}</StyledDate>
           <StyledDetailContainer>
             <StyledInfo>Timer {settingTime}:00</StyledInfo>

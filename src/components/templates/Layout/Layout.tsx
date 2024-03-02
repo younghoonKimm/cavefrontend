@@ -42,11 +42,11 @@ function Layout({ children, isNav = true }: LayoutProps) {
 
 const StyledBody = styled.div`
   display: flex;
+  width: 100%;
+
   min-height: 100vh;
 `;
 
-const StyledMain = styled.main`
-  width: 100%;
-`;
+const StyledMain = styled.main``;
 
 export default Layout;

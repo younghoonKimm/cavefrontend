@@ -19,7 +19,7 @@ function CreateConfrenceModal() {
   useEffect(() => {
     if (user) {
       setConferenceData({
-        title: '테ㅡ트',
+        title: '케케',
         status: 'R',
         agendas: [{ title: 'sddssd', text: 'dssddssd' }],
         users: [user.id],

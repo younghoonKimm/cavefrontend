@@ -16,3 +16,9 @@ export interface SVGProps {
   height?: number;
   [key: string]: any;
 }
+
+export enum ConferenceStatus {
+  Reserve = 'R',
+  Proceed = 'P',
+  Done = 'D',
+}

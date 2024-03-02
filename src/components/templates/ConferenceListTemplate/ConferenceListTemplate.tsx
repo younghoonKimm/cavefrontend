@@ -1,13 +1,27 @@
 import Conference from '@/components/molecules/Conference/Conference';
 import useAuth from '@/hooks/api/useAuth';
 import { useGetConferences } from '@/hooks/api/useConference';
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import Layout from '../Layout/Layout';
 import styled from 'styled-components';
+import Conferences from '@/components/organisms/Conferences/Conferences';
+import { ConferenceStatus, IConference } from '@/types/conference';
 
 function ConferenceListTemplate() {
   const { user } = useAuth();
   const { conferences } = useGetConferences(user);
+
+  const categorizedconferences = useMemo(
+    () =>
+      conferences?.reduce(
+        (acc: any, cur: IConference) => {
+          acc = { ...acc, [cur.status]: [...acc[cur.status], cur] };
+          return acc;
+        },
+        { P: [], R: [], D: [] },
+      ),
+    [conferences],
+  );
 
   return (
     <Layout>
@@ -24,16 +38,32 @@ function ConferenceListTemplate() {
               ))}
             </div>
           )}
-          <StyledListContainer>
-            <div>
+
+          {/* <div>
               <div>예약된 회의</div>
 
               <div>n건</div>
             </div>
             {conferences?.map((conference) => (
               <Conference key={conference.id} conference={conference} />
-            ))}
-          </StyledListContainer>
+            ))} */}
+          {categorizedconferences && (
+            // todo object val
+            <StyledListContainer>
+              <Conferences
+                type={ConferenceStatus.Reserve}
+                conferences={categorizedconferences[ConferenceStatus.Reserve]}
+              />
+              <Conferences
+                type={ConferenceStatus.Proceed}
+                conferences={categorizedconferences[ConferenceStatus.Proceed]}
+              />
+              <Conferences
+                type={ConferenceStatus.Done}
+                conferences={categorizedconferences[ConferenceStatus.Done]}
+              />
+            </StyledListContainer>
+          )}
         </StyledContainer>
       </Suspense>
     </Layout>
@@ -52,14 +82,7 @@ const StyledContainer = styled.div`
 
 const StyledListContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 10px 0px;
-  background-color: #f7cb46;
-  width: 400px;
-  justify-content: center;
-  align-items: center;
-  padding: 16px 20px;
-  border-radius: 30px;
+  gap: 0 20px;
 `;
 
 export default ConferenceListTemplate;
