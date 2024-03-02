@@ -8,6 +8,7 @@ interface ButtonProps {
   styleType?: ButtonStyleType;
   buttonText: string;
   onClick: any;
+  children?: any;
 }
 
 function DefaultButton({
@@ -15,19 +16,33 @@ function DefaultButton({
   buttonText,
   styleType = 'default',
   onClick,
+  children,
 }: ButtonProps) {
   return (
     <StyledButton type={type} styleType={styleType} onClick={onClick}>
+      {children}
       {buttonText}
     </StyledButton>
   );
 }
 
 const StyledButton = styled.button<{ styleType?: ButtonStyleType }>`
-  color: #fff;
-  background: black;
-  padding: 8px 12px;
-  border-radius: 8px;
+  /* color: #fff;
+  background: black; */
+  background: ${(props) =>
+    props.styleType === 'primary' ? '#fff' : 'transparent'};
+  padding: 15px 20px 14px;
+  border-radius: 16px;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: left;
+  vertical-align: middle;
+
+  svg {
+    float: left;
+    margin-right: 12px;
+  }
 `;
 
 export default DefaultButton;

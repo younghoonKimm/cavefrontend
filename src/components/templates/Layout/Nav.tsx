@@ -11,6 +11,13 @@ import useAuth from '@/hooks/api/useAuth';
 import { resetTokens } from '@/utils/getCookies';
 import { modalAtoms } from '@/states/common';
 import useModal from '@/hooks/useModal';
+import LogoImg from '../../../../public/favicon.png';
+import Link from 'next/link';
+import {
+  AddConfIcon,
+  FolderIcon,
+  TrashIcon,
+} from '@/components/atoms/Svg/Index';
 
 function Nav() {
   const router = useRouter();
@@ -44,6 +51,10 @@ function Nav() {
       {user ? (
         <>
           <div>
+            <Link href="/">
+              <Image src={LogoImg} alt="logo" width="80" height="40" />
+            </Link>
+            {/* 
             {user.profileImg && (
               <StyledProfileImg onClick={handleClickProfile}>
                 <Image
@@ -53,21 +64,41 @@ function Nav() {
                   height="52"
                 />
               </StyledProfileImg>
-            )}
-            <span>{user.name ?? '회원'}님 환영합니다</span>
+            )} */}
+            {/* <span>{user.name ?? '회원'}님 환영합니다</span> */}
           </div>
-          <div>
+          <StyledButtonsContainer>
             <DefaultButton
               type="button"
-              buttonText="생성"
+              buttonText="회의 생성하기"
+              styleType="primary"
               onClick={handleAddConference}
-            />
+            >
+              <AddConfIcon width={22} height={22} />
+            </DefaultButton>
+            <StyledFolderListContainer>
+              <DefaultButton
+                type="button"
+                buttonText="전체 회의록"
+                onClick={() => {}}
+              >
+                <FolderIcon width={22} height={22} />
+              </DefaultButton>
+
+              <DefaultButton
+                type="button"
+                buttonText="휴지통"
+                onClick={() => {}}
+              >
+                <TrashIcon width={22} height={22} />
+              </DefaultButton>
+            </StyledFolderListContainer>
             <DefaultButton
               type="button"
-              buttonText="로그아웃"
+              buttonText="로그아웃 테스트"
               onClick={signOut}
             />
-          </div>
+          </StyledButtonsContainer>
         </>
       ) : (
         <DefaultButton type="button" buttonText="로그인" onClick={signUp} />
@@ -77,10 +108,14 @@ function Nav() {
 }
 
 const StyledNav = styled.nav`
-  width: 100%;
+  width: 260px;
+  height: 100%;
+  min-height: 600px;
   display: flex;
-  justify-content: space-between;
-  background: #fff;
+  /* justify-content: space-between; */
+  flex-direction: column;
+  background: green;
+  padding: 26px 24px;
 `;
 
 const StyledProfileImg = styled.div`
@@ -92,6 +127,14 @@ const StyledProfileImg = styled.div`
     width: 100%;
     object-fit: cover;
   }
+`;
+
+const StyledButtonsContainer = styled.div`
+  margin-top: 106px;
+`;
+
+const StyledFolderListContainer = styled.div`
+  margin-top: 20px;
 `;
 
 export default Nav;

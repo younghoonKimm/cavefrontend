@@ -17,4 +17,7 @@ export interface IConference {
   status: ConferenceStatus;
   agendas: IAgneda[];
   users: Pick<User, 'name' | 'profileImg'>[];
+  date: string;
+  location?: string;
+  settingTime: string;
 }

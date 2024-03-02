@@ -11,7 +11,7 @@ function CreateConfrenceModal() {
 
   const [conferenceData, setConferenceData] = useState<any>({
     title: '테스트용',
-    status: 'P',
+    status: 'R',
     agendas: [{ title: 'sddssd', text: 'dssddssd' }],
     users: [],
   });
@@ -20,7 +20,7 @@ function CreateConfrenceModal() {
     if (user) {
       setConferenceData({
         title: '테ㅡ트',
-        status: 'P',
+        status: 'R',
         agendas: [{ title: 'sddssd', text: 'dssddssd' }],
         users: [user.id],
       });
@@ -31,6 +31,7 @@ function CreateConfrenceModal() {
     try {
       if (user) {
         createConference(conferenceData);
+        // todo update query
       }
       return router.push('/');
     } catch (e) {}

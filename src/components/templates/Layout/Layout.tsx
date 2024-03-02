@@ -9,10 +9,13 @@ import useModal from '@/hooks/useModal';
 import dynamic from 'next/dynamic';
 import useAuth from '@/hooks/api/useAuth';
 
+import styled from 'styled-components';
+
 interface LayoutProps extends Comp {
   isNav?: boolean;
 }
 const Nav = dynamic(() => import('./Nav'), { ssr: false });
+const RNB = dynamic(() => import('./RNB'), { ssr: false });
 
 function Layout({ children, isNav = true }: LayoutProps) {
   const [showComponent, setShowComponent] = useState(false);
@@ -25,15 +28,25 @@ function Layout({ children, isNav = true }: LayoutProps) {
   }, []);
 
   return (
-    <div>
+    <StyledBody>
       {isModal ? (
         <Modal onClose={onCloseModal} isOpen={true} modalType={modalType} />
       ) : null}
       <header>{isNav && <Nav />}</header>
-      <main role="main">{showComponent ? children : null}</main>
+      <StyledMain role="main">{showComponent ? children : null}</StyledMain>
+      <RNB />
       <footer></footer>
-    </div>
+    </StyledBody>
   );
 }
+
+const StyledBody = styled.div`
+  display: flex;
+  min-height: 100vh;
+`;
+
+const StyledMain = styled.main`
+  width: 100%;
+`;
 
 export default Layout;
