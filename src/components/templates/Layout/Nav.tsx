@@ -8,8 +8,6 @@ import { logOutAPI } from '@/api/auth/auth';
 import { DefaultButton } from '@/components/atoms/Button';
 import useAuth from '@/hooks/api/useAuth';
 
-import { resetTokens } from '@/utils/getCookies';
-import { modalAtoms } from '@/states/common';
 import useModal from '@/hooks/useModal';
 import LogoImg from '../../../../public/favicon.png';
 import Link from 'next/link';
@@ -18,6 +16,7 @@ import {
   FolderIcon,
   TrashIcon,
 } from '@/components/atoms/Svg/Index';
+import { getCategoryAPI, postCategoryAPI } from '@/api/category/category';
 
 function Nav() {
   const router = useRouter();
@@ -45,6 +44,28 @@ function Nav() {
   const handleClickProfile = () => router.push('/profile/setting');
 
   const onOpenModal = () => openModal('conferenceCreate');
+
+  const handleAddCategory = async () => {
+    const cat = {
+      title: '임시',
+      order: 1,
+    };
+    try {
+      await postCategoryAPI(cat);
+    } catch (error) {}
+  };
+
+  // console.log(user);
+
+  const getCategory = async () => {
+    try {
+      const res = await getCategoryAPI('7a61ed02-451f-40db-b762-c2c40e4c40ed');
+
+      console.log(res);
+    } catch (error) {}
+  };
+
+  // 7a61ed02-451f-40db-b762-c2c40e4c40ed
 
   return (
     <StyledNav>
@@ -80,15 +101,37 @@ function Nav() {
               <DefaultButton
                 type="button"
                 buttonText="전체 회의록"
-                onClick={() => {}}
+                onClick={handleAddCategory}
               >
                 <FolderIcon width={22} height={22} />
               </DefaultButton>
 
+              {user?.categories && (
+                <StyledFolderList>
+                  <DefaultButton
+                    type="button"
+                    buttonText="기본폴더"
+                    onClick={() => {}}
+                  >
+                    <FolderIcon width={22} height={22} />
+                  </DefaultButton>
+                  {user?.categories.map((category) => (
+                    <DefaultButton
+                      key={category.id}
+                      type="button"
+                      buttonText={category.title}
+                      onClick={() => {}}
+                    >
+                      <FolderIcon width={22} height={22} />
+                    </DefaultButton>
+                  ))}
+                </StyledFolderList>
+              )}
+
               <DefaultButton
                 type="button"
                 buttonText="휴지통"
-                onClick={() => {}}
+                onClick={getCategory}
               >
                 <TrashIcon width={22} height={22} />
               </DefaultButton>
@@ -116,6 +159,13 @@ const StyledNav = styled.nav`
   flex-direction: column;
   background: green;
   padding: 26px 24px;
+`;
+
+const StyledFolderList = styled.div`
+  margin-left: 12px;
+  button {
+    padding: 12px 32px 12px;
+  }
 `;
 
 const StyledProfileImg = styled.div`

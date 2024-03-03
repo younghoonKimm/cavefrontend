@@ -29,9 +29,9 @@ const Home: NextPage = () => {
       </Head>
 
       <ApiErrorBoundary>
-        <Suspense>
-          <ConferenceListTemplate />
-        </Suspense>
+        {/* <Suspense> */}
+        <ConferenceListTemplate />
+        {/* </Suspense> */}
       </ApiErrorBoundary>
     </>
   );

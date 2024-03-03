@@ -11,6 +11,10 @@ export type ModalAtomType = {
   modalType: ModalTypes;
 };
 
+export type rnbDateType = {
+  rnbDate: Date;
+};
+
 export interface SVGProps {
   width?: number;
   height?: number;

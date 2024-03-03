@@ -44,9 +44,19 @@ function Conference({ conference }: ConferenceProps) {
             ) : null,
           )} */}
           <StyledProfileImg>
-            {user?.profileImg && (
+            {users?.map((user, idx) => (
+              <Image
+                key={user.profileImg + user.name}
+                src={user.profileImg ?? ''}
+                alt="image"
+                width="40"
+                height="40"
+                style={{ zIndex: idx, left: idx + 10 }}
+              />
+            ))}
+            {/* {user?.profileImg && (
               <Image src={user.profileImg} alt="image" width="40" height="40" />
-            )}
+            )} */}
           </StyledProfileImg>
         </StyledUserContainer>
       </StyledRouterButton>
@@ -115,13 +125,15 @@ const StyledUserContainer = styled.div`
 `;
 
 const StyledProfileImg = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
+  display: flex;
+  position: relative;
   img {
     width: 100%;
     object-fit: cover;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
   }
 `;
 

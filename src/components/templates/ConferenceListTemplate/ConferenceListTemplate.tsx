@@ -31,13 +31,13 @@ function ConferenceListTemplate() {
             <h2>TITLE AREA</h2>
           </StyledTitle>
 
-          {user?.categories && (
+          {/* {user?.categories && (
             <div>
               {user?.categories.map((category) => (
                 <div key={category.id}>{category.title}</div>
               ))}
             </div>
-          )}
+          )} */}
 
           {/* <div>
               <div>예약된 회의</div>

@@ -20,6 +20,12 @@ export const getRefreshToken = async (error: any) => {
   const originalRequest = config;
   const { status } = response;
 
+  if (status === 403) {
+    resetAuth();
+
+    return;
+  }
+
   if (status === 401) {
     try {
       const newToken = await getNewTokenAPI();
@@ -30,15 +36,13 @@ export const getRefreshToken = async (error: any) => {
       setCookie('CAV_RFS', refreshToken);
 
       const originRes = await axiosInstance.request(originalRequest);
+      console.log(originalRequest);
       return originRes;
     } catch (error) {
+      console.log(error);
       console.log('error reset token');
-      resetAuth();
+      // resetAuth();
     }
-  }
-
-  if (status === 403) {
-    return resetAuth();
   }
 
   throw error;
@@ -51,13 +55,14 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 403) {
       resetAuth();
-      throw error;
+      // window.location.pathname = '/setting';
+      throw new Error(error);
     }
     if (error.response?.status === 401) {
       try {
         return await getRefreshToken(error);
-      } catch (e) {
-        throw e;
+      } catch (error) {
+        throw error;
       }
     }
 

@@ -45,7 +45,6 @@ export function withAuth(
         //   throw new Error();
         // }
       } catch (error) {
-        console.log(error);
         res.setHeader('set-cookie', [
           `CAV_ACC=""; Max-Age=0`,
           `CAV_RFS=""; Max-Age=0`,

@@ -10,6 +10,8 @@ import dynamic from 'next/dynamic';
 import useAuth from '@/hooks/api/useAuth';
 
 import styled from 'styled-components';
+import useRnbInfo from '@/hooks/useRnb';
+import { useGetConferences } from '@/hooks/api/useConference';
 
 interface LayoutProps extends Comp {
   isNav?: boolean;
@@ -20,6 +22,8 @@ const RNB = dynamic(() => import('./RNB'), { ssr: false });
 function Layout({ children, isNav = true }: LayoutProps) {
   const [showComponent, setShowComponent] = useState(false);
   const { user, clearUserQuery } = useAuth();
+  const { conferences } = useGetConferences(user);
+
   const { modalOption, onCloseModal } = useModal();
   const { isModal, modalType } = modalOption;
 
@@ -34,7 +38,7 @@ function Layout({ children, isNav = true }: LayoutProps) {
       ) : null}
       <header>{isNav && <Nav />}</header>
       <StyledMain role="main">{showComponent ? children : null}</StyledMain>
-      <RNB />
+      <RNB conferences={conferences} />
       <footer></footer>
     </StyledBody>
   );

@@ -1,3 +1,5 @@
+import { ICategory } from './category';
+
 export interface User {
   id: string;
   name: string;
@@ -7,13 +9,5 @@ export interface User {
 }
 
 export type IUser = User | null;
-
-export type ICategory = {
-  id: string;
-  createdAt: string;
-  updateAt: string;
-  title: string;
-  order: number;
-};
 
 export type PartialUserType = Partial<User>;
