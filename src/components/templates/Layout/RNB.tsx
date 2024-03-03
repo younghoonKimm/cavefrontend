@@ -57,6 +57,8 @@ const StyledReserveInfoContainer = styled.div`
 `;
 
 const StyledReserveInfo = styled.div<{ children: React.ReactNode }>`
+  margin-bottom: 20px;
+
   p {
     font-size: 16px;
     font-weight: 600;
